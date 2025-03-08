@@ -48,12 +48,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using System.Xml;
-using System.Xml.Linq;
 using WpfAnimatedGif;
-using JsonException = Newtonsoft.Json.JsonException;
 using Ellipse = System.Windows.Shapes.Ellipse;
-using System.Security.Cryptography;
-using static System.Windows.Forms.LinkLabel;
 
 namespace Essence
 {
@@ -148,7 +144,7 @@ namespace Essence
     {
         private static readonly string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-
+        internal static UserData InternalUserData = new UserData();
         private DispatcherTimer raintimer;
         private Random random = new Random();
 
@@ -333,9 +329,15 @@ namespace Essence
         private bool cpu_slow = false;
 
 
+
+        private DispatcherTimer uiResponsivenessTimer;
+        public void OnUIResponse(object sender, EventArgs e)
+        {
+            try
+            { App.isUIResponsive = true; } catch { }
+        }
         public MainWindow()
         {
-            DebugProtect3.HideOSThreads();
 
             ExecSettings.build_number = Properties.Resources.BuildInfos.Split('+')[0];
             ExecSettings.build_date = Properties.Resources.BuildInfos.Split('+')[1];
@@ -478,6 +480,12 @@ namespace Essence
 
             MinHeight = 550;
             MinWidth = 850;
+
+
+            uiResponsivenessTimer = new DispatcherTimer();
+            uiResponsivenessTimer.Interval = TimeSpan.FromSeconds(1);
+            uiResponsivenessTimer.Tick += OnUIResponse;
+            uiResponsivenessTimer.Start();
         }
 
 
@@ -512,8 +520,8 @@ namespace Essence
             while (WindowState == WindowState.Minimized) { await Task.Delay(100); }
 
             //if the animation started the close animation, wait to fully close, to make a new one (dont just add text)
-            if(Notification2 != null && Notification2.kk != 0 && notifacccc)
-                while(notifacccc) { await Task.Delay(100); }
+            if (Notification2 != null && Notification2.kk != 0 && notifacccc)
+                while (notifacccc) { await Task.Delay(100); }
 
             if (!notifacccc)
             {
@@ -564,71 +572,6 @@ namespace Essence
 
         }
 
-
-
-
-
-        //private async void CloseNotf_Click(object sender, RoutedEventArgs e)
-        //{
-        //    Fade(BlackMamba, 0.7, 0, 0.3);
-        //    await Task.Delay(200);
-        //    Move(CumNotification, new Thickness(0, 0, 0, 0), new Thickness(0, 0, 0, -600), 0.4);
-        //    await Task.Delay(100);
-        //    BlackMamba.Visibility = Visibility.Collapsed;
-        //}
-
-
-        private async void check_user_ban()
-        {
-            var cookieContainer = new CookieContainer();
-            var handler = new HttpClientHandler()
-            {
-                CookieContainer = cookieContainer
-            };
-
-            using (var client = new HttpClient(handler))
-            {
-
-                var url = "https://usermoderation.roblox.com/v1/not-approved";
-                var cookie = new Cookie(".ROBLOSECURITY", "_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_D9569523DA8F227739CDEEB0B9EFC25CED75153AA0490A58DFBE010C3075A2CF8065CAD87F30901DAF82EEA2AA79F8C96E7C9828EA594B4377B161898DCE4A3EC74F83BE43BCA515603E2375C0D47A7533F59A5568A9D509437280A1658358E2309D3E8186E8E7965F4EBB146794524CC9D8B812E38A045359A92AEF13AF6DFF8F232820B545BD276E4D7805981FBC64FE20ADA810426E86851DDDD0C7557E9A871985FA5396AB0A82986C83B857743A534DB999F55179CC393C815A1104ADC91E28F31AB443749A5599407EE1FEF742C11000E67C5756D4CA81228A461E79FDF8216EEDC2DCAE44D42DFEBCB51DFDD3A6461B23EA5FA6BDA0B0C26D93506CB58DA7AC12BC867BF540DF8CCE0AA41D70E9292C3CDD4B5D4789B284F5FD0589B18BE588D800805A166C0A6C1DDE3F6DCB3707F6BF64CBD13384961E09D16F557CEF411277949129D56DE6F3EBBA9F7B4436EEAFB51A9C050EDEF3D9267AEBE7B33571C3513F3C200BC848C32C6DEF710EFAD5A621F33AD9C68DC1C820EC17E50F2BE2B03084790D4CE3DE7C632E6BEDF0970BA578A1120C6E59998762ABAB6EB4D06C24B127A5187E409D62AEE40175B9C51D1C85FD22836E54919760402F55ED9FC7B87DBE41B57885463C7A191F398F1DADB7D00BD57FDCF55D12A23B46CCED938E9ED7F78FB50D348E9D193FBD70F7400AA827D2EB0316D16336BF9739D124D77D8AD8AD8A0DEFD25593E882BAE78EF82A5C164E5A625F6BAD4CD49AC9F8B24C233535BAB74108CBBC1A1C0DB6A8D1EB07941F842DAA25531C3FB2F96689E9C7EDE3B7DAA5B2B38211816B373A6975B9B6CA62CC059333BA1C53DAB100366EAA712695992267275C2DC13A032CD8D3DCA4AEA90399C9812FEE834CA7520BB5E24980F2EE78B61DBD6634512AAD8397354CBCEFC82C7D937839F924049E935AC6D4BDA4F0E8E30E0E5B78365F48692CCB93D142D49A1B2BAB527548FAF9EA73D6359F78EF3030C2FF9273553F164F7A35C784D62AAC8FA32CC463B92AE7F2EE807521AFC318713755C21C6E107585FDDA4A4B63FA894AE2D0BA8FFB9CD29269A9E5F09F6A485D1251B9730F2A14BE25A183FB2D");
-                cookieContainer.Add(new Uri("https://usermoderation.roblox.com"), cookie);
-
-                try
-                {
-                    var response = await client.GetAsync(url);
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    //MessageBox.Show(responseBody);
-
-
-                    JObject jsonResponse = JObject.Parse(responseBody);
-
-                    string messageToUser = jsonResponse["messageToUser"]?.ToString();
-                    string beginDate = jsonResponse["beginDate"]?.ToString();
-                    string endDate = jsonResponse["endDate"]?.ToString() ?? "N/A";
-                    string nextConsequenceType = jsonResponse["context"]?["NEXT_CONSEQUENCE_TYPE"]?.ToString() ?? "N/A";
-
-                    Console.WriteLine($"Message to User: {messageToUser}");
-                    Console.WriteLine($"Begin Date: {beginDate}");
-                    Console.WriteLine($"End Date: {endDate}");
-                    Console.WriteLine($"Next Consequence Type: {nextConsequenceType}");
-
-                    var badUtterances = jsonResponse["badUtterances"];
-                    if (badUtterances != null)
-                    {
-                        foreach (var utterance in badUtterances)
-                        {
-                            string utteranceText = utterance["utteranceText"]?.ToString();
-                            Console.WriteLine($"Utterance Text: {utteranceText}");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
-                }
-            }
-
-        }
 
         static string GetTimeAgo(DateTime lastLogin)
         {
@@ -697,7 +640,7 @@ namespace Essence
                     Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Bloxstrap", "Versions")
                 };
 
-                Communications.robloxversions2 = paths
+                general.robloxlocalversions = paths
                 .Where(Directory.Exists)
                 .SelectMany(Directory.GetDirectories)
                 .Select(Path.GetFileName)
@@ -714,14 +657,12 @@ namespace Essence
 
                     if (versionGuid != "null")
                     {
-                        Communications.robloxlocalcurrent = versionGuid;
+                        general.robloxlocalcurrent = versionGuid;
 
-                        if (Communications.robloxversions2.Contains(versionGuid))
-                            Communications.robloxversions2.Append(versionGuid);
+                        if (general.robloxlocalversions.Contains(versionGuid))
+                            general.robloxlocalversions.Append(versionGuid);
                     }
                 }
-
-                int ggs = DebugProtect1.PerformChecks();
 
                 try
                 {
@@ -785,69 +726,6 @@ namespace Essence
                                 {
                                     cu = "http://api.whatexpsare.online/status/";
                                 }
-
-                                //HttpResponseMessage response = await client.GetAsync($"{cu}versions/future");
-
-                                //if (response.IsSuccessStatusCode)
-                                //{
-                                //    string content = await response.Content.ReadAsStringAsync();
-
-                                //    JObject json = JObject.Parse(content);
-
-                                //    string windowsVersion = string.Empty;
-                                //    string windowsDate = string.Empty;
-
-                                //    if (json["Windows"] != null)
-                                //    {
-                                //        windowsVersion = json["Windows"]?.ToString();
-                                //        windowsDate = json["WindowsDate"]?.ToString();
-                                //    }
-                                //    else if (json["windows"] != null)
-                                //    {
-                                //        windowsVersion = json["windows"]?["version"]?.ToString();
-                                //        windowsDate = json["windows"]?["date"]?.ToString();
-                                //    }
-
-                                //    if (!string.IsNullOrEmpty(windowsVersion) && !KeyGay2.robloxversions.Contains(windowsVersion))
-                                //    {
-                                //        //Roblox_update_soon_border.Visibility = Visibility.Visible;
-
-                                //        if (DateTime.TryParse(windowsDate, out DateTime updateDateUtc))
-                                //        {
-                                //            //DateTime updateDateLocal = updateDateUtc.ToLocalTime();
-                                //            //TimeSpan timeRemaining = updateDateLocal - DateTime.Now;
-
-                                //            TimeSpan timeRemaining = updateDateUtc - DateTime.Now;
-
-                                //            if (updateDateUtc < DateTime.Now)
-                                //            {
-                                //                if (CurrentRobloxVersion.Text != "---" && !KeyGay2.robloxversions.Contains(CurrentRobloxVersion.Text))
-                                //                    new_roblox_update_txt.Text = "Your Roblox version is oudated";
-                                //            }
-                                //            else
-                                //            {
-                                //                if (timeRemaining.TotalMinutes < 60)
-                                //                    new_roblox_update_txt.Text = $"New Roblox Update in {Math.Ceiling(timeRemaining.TotalMinutes)} minutes";                                            
-                                //                else
-                                //                    new_roblox_update_txt.Text = $"New Roblox Update in {Math.Ceiling(timeRemaining.TotalHours)} hours";                                          
-                                //            }
-                                //        }
-                                //    }
-                                //    else
-                                //    {
-                                //        //Roblox_update_soon_border.Visibility = Visibility.Collapsed;
-
-                                //    }
-                                //}
-                                //else if (cu == "http://api.whatexpsare.online/status/")
-                                //{
-                                //    cu = "http://whatexpsare.online/api/";
-                                //}
-                                //else
-                                //{
-                                //    cu = "http://api.whatexpsare.online/status/";
-                                //}
-
                             }
                             catch
                             {
@@ -859,70 +737,55 @@ namespace Essence
                 {
 
                 }
+
+
                 try
                 {
                     JObject json = JObject.Parse(await Communications.RequestResource("general"));
-                    roblox_v = (string)json["user"]["name"];
-                    o
-
-
-                    if (roblox_v.Contains(Communications.robloxlocalcurrent))
+                    try
                     {
-                        Roblox_update_soon_border2.Visibility = Visibility.Collapsed;
-                        Roblox_updated.Visibility = Visibility.Visible;
-                        Executor_patched.Visibility = Visibility.Collapsed;
+                        roblox_v = (string)json["robloxcompatible"];
+
+                        if (roblox_v.Contains(general.robloxlocalcurrent))
+                        {
+                            Roblox_update_soon_border2.Visibility = Visibility.Collapsed;
+                            Roblox_updated.Visibility = Visibility.Visible;
+                            Executor_patched.Visibility = Visibility.Collapsed;
+                        }
+                        else if (general.robloxlocalcurrent.Length < 5)
+                        {
+                            Roblox_update_soon_border2.Visibility = Visibility.Visible;
+                            new_roblox_update_txt.Text = "Roblox Application Not Found";
+
+                            Roblox_updated.Visibility = Visibility.Collapsed;
+                            Executor_patched.Visibility = Visibility.Collapsed;
+                        }
+                        else if (CurrentRobloxVersion.Text.Length > 5 && CurrentRobloxVersion.Text != general.robloxlocalcurrent)
+                        {
+                            Roblox_update_soon_border2.Visibility = Visibility.Visible;
+                            new_roblox_update_txt.Text = "Roblox Application Oudated";
+
+                            Roblox_updated.Visibility = Visibility.Collapsed;
+                            Executor_patched.Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            Roblox_update_soon_border2.Visibility = Visibility.Collapsed;
+                            Roblox_updated.Visibility = Visibility.Collapsed;
+                            Executor_patched.Visibility = Visibility.Visible;
+                        }
                     }
-                    else if (Communications.robloxlocalcurrent.Length < 5)
-                    {
-                        Roblox_update_soon_border2.Visibility = Visibility.Visible;
-                        new_roblox_update_txt.Text = "Roblox Application Not Found";
+                    catch { }
 
-                        Roblox_updated.Visibility = Visibility.Collapsed;
-                        Executor_patched.Visibility = Visibility.Collapsed;
-                    }
-                    else if (CurrentRobloxVersion.Text.Length > 5 && CurrentRobloxVersion.Text != Communications.robloxlocalcurrent)
-                    {
-                        Roblox_update_soon_border2.Visibility = Visibility.Visible;
-                        new_roblox_update_txt.Text = "Roblox Application Oudated";
-
-                        Roblox_updated.Visibility = Visibility.Collapsed;
-                        Executor_patched.Visibility = Visibility.Collapsed;
-                    }
-                    else
-                    {
-                        Roblox_update_soon_border2.Visibility = Visibility.Collapsed;
-                        Roblox_updated.Visibility = Visibility.Collapsed;
-                        Executor_patched.Visibility = Visibility.Visible;
-                    }
-
-                    int ggs2 = DebugProtect2.PerformChecks();
-
-                    if (xxx == "Disconnect!")
-                    {
-                        StopAllInteractions = true;
-                        MessageBox.Show("There was a problem with your Essence account and we need to close this session.");
-                        RestartApp(true);
-                    }
-
-                    if (ggs == 1 || ggs2 == 1)
-                    {
-                        MessageBox.Show("There was a problem with your Essence account and we need to close this session.");
-                        Process.GetCurrentProcess().Kill();
-                    }
-
-
-                    var userData = JsonConvert.DeserializeObject<Dictionary<string, object>>(xxx.Split(new string[] { "||||||||" }, StringSplitOptions.RemoveEmptyEntries)[0]);
-                    if (userData != null && userData.ContainsKey("email"))
+                    if (json["userdata"] != null)
                     {
                         try
                         {
                             await Dispatcher.InvokeAsync(() =>
                             {
-                                user_r = Convert.ToInt32(userData["user_role"].ToString());
-                                Communications.invitecode = userData["user_id"].ToString();
-                                Communications.invites = Convert.ToInt32(userData["invites"].ToString());
-                                inviteeesss.Text = userData["invites"].ToString();
-                                ProfileSettings.invitestxt.Text = userData["invites"].ToString();
+                                user_r = Convert.ToInt32(json["userdata"]["user_role"].ToString());
+                                inviteeesss.Text = json["userdata"]["invites"].ToString();
+                                ProfileSettings.invitestxt.Text = json["userdata"]["invites"].ToString();
 
                                 try
                                 {
@@ -1003,7 +866,7 @@ namespace Essence
                                     }
                                 }
 
-                                JArray maquinasAutorizadas = JArray.Parse(userData["authorized_devices"].ToString());
+                                JArray maquinasAutorizadas = JArray.Parse(json["userdata"]["authorized_devices"].ToString());
                                 foreach (var maquina in maquinasAutorizadas)
                                 {
                                     string hwid = maquina["hwid"].ToString();
@@ -1011,7 +874,7 @@ namespace Essence
                                     var lastlocation = maquina["last_location"].ToString();
                                     var devicetyp = maquina["device"].ToString();
 
-                                    if (hwid != Secure.GetHWID())
+                                    if (hwid != Marshal.PtrToStringAnsi(Secure.GetHWID()))
                                     {
                                         Device lol = new Device();
 
@@ -1098,31 +961,9 @@ namespace Essence
                         }
                     }
 
-
-                    //else
-                    //{
-                    //    //MessageBox.Show("Erro no login. Detalhes: " + response);
-                    //    Process.GetCurrentProcess().Kill();
-                    //}
-
-                    //string[] versionshit = xxx.Split(new string[] { "||||||||" }, StringSplitOptions.RemoveEmptyEntries)[0].Split(new string[] { "||||" }, StringSplitOptions.RemoveEmptyEntries);
-
-                    //Dictionary<string, string> knownHashes = new Dictionary<string, string>();
-                    //string[] hashesss = versionshit[0].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-                    //foreach (string hash in hashesss)
-                    //{
-                    //    string name = hash.Split(new string[] { " | " }, StringSplitOptions.RemoveEmptyEntries)[0];
-                    //    string id = hash.Split(new string[] { " | " }, StringSplitOptions.RemoveEmptyEntries)[1];
-                    //    knownHashes.Add(name, id);
-                    //}
-                    //bool downloadRequired = CheckFilesAndHashes($"{localAppData}\\Essence", knownHashes);
-
-
-                    string[] funny = xxx.Split(new string[] { "||||||||" }, StringSplitOptions.RemoveEmptyEntries)[1].Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
                     try
                     {
-                        totaluserst.Text = funny[2];
+                        totaluserst.Text = json["players"]["total"].ToString();
                         Fade(totalusersgridd, 0, 1, 1);
                         totalusersgridd.Visibility = Visibility.Visible;
                     }
@@ -1132,29 +973,9 @@ namespace Essence
 
                     try
                     {
-                        playersonline.Text = funny[1];
+                        playersonline.Text = json["players"]["online"].ToString(); ;
                         Fade(playersgridd, 0, 1, 1);
                         playersgridd.Visibility = Visibility.Visible;
-                    }
-                    catch { }
-
-                    await Task.Delay(80);
-
-                    try
-                    {
-                        banswithEssence.Text = funny[0];
-                        Fade(bansgridd, 0, 1, 1);
-                        bansgridd.Visibility = Visibility.Visible;
-                    }
-                    catch { }
-
-                    await Task.Delay(80);
-
-                    try
-                    {
-                        totaluserst.Text = funny[2];
-                        Fade(invitesgriddd, 0, 1, 1);
-                        invitesgriddd.Visibility = Visibility.Visible;
                     }
                     catch { }
                 }
@@ -1270,7 +1091,7 @@ namespace Essence
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     if (ExecSettings.versiontype == "beta" && false)
                         MessageBox.Show($"Erro: {ex.ToString()}");
@@ -1450,71 +1271,51 @@ namespace Essence
                 string pc = "";
                 try
                 {
-                    if (!set[3].Contains("OK"))
+                    StreamReader sr = new StreamReader(bloxfolder);
+                    pc2 = sr.ReadToEnd();
+                    sr.Close();
+
+                    //"VersionGuid": "version-3243b6d003cf4642",
+                    pc2 = pc2.Split(new string[] { "VersionGuid" }, StringSplitOptions.RemoveEmptyEntries)[1]
+                    .Split(new string[] { "\"" }, StringSplitOptions.RemoveEmptyEntries)[1];
+
+                    await Dispatcher.InvokeAsync(() =>
                     {
-                        //process.Start();
-                        //string text = process.StandardOutput.ReadToEnd();
-                        //process.WaitForExit();
-                        //pc = text.Trim();
-
-                        StreamReader sr = new StreamReader(bloxfolder);
-                        pc2 = sr.ReadToEnd();
-                        sr.Close();
-
-                        //"VersionGuid": "version-3243b6d003cf4642",
-                        pc2 = pc2.Split(new string[] { "VersionGuid" }, StringSplitOptions.RemoveEmptyEntries)[1]
-                        .Split(new string[] { "\"" }, StringSplitOptions.RemoveEmptyEntries)[1];
-
-                        await Dispatcher.InvokeAsync(() =>
+                        if ((general.robloxsupported.Contains(pc) && pc.Length > 5) || (general.robloxsupported.Contains(pc2) && pc2.Length > 5) || true)
                         {
-                            if ((set[3].Contains(pc) && pc.Length > 5) || (set[3].Contains(pc2) && pc2.Length > 5) || true)
+                            if (RobloxOudated.Visibility == Visibility.Visible)
                             {
-                                if (RobloxOudated.Visibility == Visibility.Visible)
-                                {
-                                    RobloxOudated.Visibility = Visibility.Collapsed;
-                                    TabControl.Visibility = Visibility.Visible;
-                                }
-                                patched = false;
-                                patched_check = true;
+                                RobloxOudated.Visibility = Visibility.Collapsed;
+                                TabControl.Visibility = Visibility.Visible;
                             }
-                            else if (pc.Length < 5 && pc2.Length < 5)
-                            {
-                                Status_Label2.Text = "Roblox not Installed!";
-                                patched = true;
-                                patched_check = true;
-                            }
-                            else
-                            {
-                                if (pc2.Length < 5)
-                                    Warnin_ServOff_14.Text = "This Roblox Version its not compatible. Try Bloxstrap to use an older version of Roblox.";
-
-                                Status_Label2.Text = "Roblox Uncompatible";
-                                patched = true;
-                                patched_check = true;
-
-                                if (pc2 != "")
-                                    roblox_latest.Text = pc2;
-                                else if (pc != "")
-                                    roblox_latest.Text = pc;
-
-                                Essence_suported.Text = set[3].Split(' ')[0];
-
-                                ShowWarnings(RobloxOudated, false);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        if (RobloxOudated.Visibility == Visibility.Visible)
-                        {
-                            RobloxOudated.Visibility = Visibility.Collapsed;
-                            TabControl.Visibility = Visibility.Visible;
+                            patched = false;
+                            patched_check = true;
                         }
-                        patched = false;
-                        patched_check = true;
-                    }
+                        else if (pc.Length < 5 && pc2.Length < 5)
+                        {
+                            Status_Label2.Text = "Roblox not Installed!";
+                            patched = true;
+                            patched_check = true;
+                        }
+                        else
+                        {
+                            if (pc2.Length < 5)
+                                Warnin_ServOff_14.Text = "This Roblox Version its not compatible. Try Bloxstrap to use an older version of Roblox.";
 
+                            Status_Label2.Text = "Roblox Uncompatible";
+                            patched = true;
+                            patched_check = true;
 
+                            if (pc2 != "")
+                                roblox_latest.Text = pc2;
+                            else if (pc != "")
+                                roblox_latest.Text = pc;
+
+                            Essence_suported.Text = general.robloxsupported[0];
+
+                            ShowWarnings(RobloxOudated, false);
+                        }
+                    });
                 }
                 catch
                 {
@@ -1539,7 +1340,7 @@ namespace Essence
             {
                 await Task.Delay(2000);
 
-                if (!SaveTabs)
+                if (!Settings.Default.SaveTabs)
                 {
                     try
                     {
@@ -1645,9 +1446,9 @@ namespace Essence
 
                         if (IsWindowOpen("RobloxPlayerBeta"))
                         {
-                            Communications.robloxversions2 = new List<string>();
+                            general.robloxlocalversions = new List<string>();
 
-                            foreach(Process p in Process.GetProcessesByName("RobloxPlayerBeta"))
+                            foreach (Process p in Process.GetProcessesByName("RobloxPlayerBeta"))
                             {
                                 try
                                 {
@@ -1656,7 +1457,7 @@ namespace Essence
 
                                     if (folderName.Contains("version-"))
                                     {
-                                        Communications.robloxversions2.Add(folderName);
+                                        general.robloxlocalversions.Add(folderName);
                                     }
                                 }
                                 catch
@@ -1695,7 +1496,7 @@ namespace Essence
                             if (logWatcher.IsInGame)
                             {
                                 adsandsandjsa = true;
-                                if (UserSettings.CollectGameData && logWatcher.CurrentPlaceId != lastplaceid && logWatcher.CurrentPlaceId != 0)
+                                if (Settings.Default.CollectGameData && logWatcher.CurrentPlaceId != lastplaceid && logWatcher.CurrentPlaceId != 0)
                                 {
                                     lastplaceid = logWatcher.CurrentPlaceId;
                                     var result = await GetRobloxGameInfo(placeid: logWatcher.CurrentPlaceId);
@@ -1832,8 +1633,8 @@ namespace Essence
                                 //    roblox_look_finished = true;
                                 //    ShowBa(PrintValue("userId", logWatcher.useri));
                                 //}
-                            };                           
-                           
+                            };
+
                         }
                     }
                 }
@@ -2023,7 +1824,7 @@ namespace Essence
             ProfileSettings.UserManagementGrid.Visibility = Visibility.Collapsed;
             ProfileSettings.UserManagementBorder.Margin = new Thickness(0, 100, 0, 25);
 
-            Inicializar1();            
+            Inicializar1();
         }
 
         bool term;
@@ -2191,7 +1992,7 @@ namespace Essence
 
         private void ReduceQuality()
         {
-            MaximumExecutorQuality = false;
+            Settings.Default.OptimizeUI = true;
             fefnejnfeajnfjaenf = 2.2;
             WindowBorder.Effect = null;
         }
@@ -2348,7 +2149,7 @@ namespace Essence
 
             await Dispatcher.InvokeAsync(() =>
             {
-                Properties.Settings.Default.Name = nome;                
+                Properties.Settings.Default.Name = nome;
                 try { User_config.Text = lm.Translate("Olá") + ", " + nome + "!"; } catch { }
                 try { ProfileSettings.f3f3nfy3uf3f.Text = nome; } catch { }
 
@@ -2359,18 +2160,11 @@ namespace Essence
         private async void Mudar_Imagem(string imagem = "")
         {
             if (string.IsNullOrEmpty(imagem) || imagem == "" || imagem.Length < 10)
-                imagem = "https://i.imgur.com/hxNqiz8.png";            
+                imagem = "https://i.imgur.com/hxNqiz8.png";
 
             await Dispatcher.InvokeAsync(() =>
             {
                 Properties.Settings.Default.Avatar = imagem;
-                try
-                {
-                    List<string> linhas = new List<string>(File.ReadAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt"));
-                    linhas[4] = imagem;
-                    File.WriteAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt", linhas);
-                }
-                catch { }
 
                 try
                 {
@@ -2476,8 +2270,6 @@ namespace Essence
         }
 
 
-
-        string premiumkey = "";
         bool premium = false;
 
         bool MODIFY = false;
@@ -2882,7 +2674,7 @@ namespace Essence
             //}
         }
 
-        private async void AddText(string txt)
+        internal static void AddText(string txt)
         {
             TextBlock a = new TextBlock()
             {
@@ -3177,7 +2969,7 @@ namespace Essence
 
                             AdvancedSearch(datar[0], datar[1]);
 
-                            var data = await GetRobloxGameInfo(placeid:long.Parse(datar[0]));
+                            var data = await GetRobloxGameInfo(placeid: long.Parse(datar[0]));
                             dwqnduwnq.Text = lm.Translate("Players online: ") + ConverterParaStringCompacta(data.playerCount);
                         };
 
@@ -3196,6 +2988,7 @@ namespace Essence
 
         private void RestartApp(bool warn)
         {
+            Settings.Default.Save();
             CloseWriters();
             StopAllInteractions = true;
             if (warn)
@@ -3219,7 +3012,7 @@ namespace Essence
 
         private bool finish_start_animations = false;
         private string lastplayedurl = "";
-        
+
         WelcomePage WelcomeWindow;
         private int user_r = 10;
         private bool OHHHHH = false;
@@ -3245,30 +3038,17 @@ namespace Essence
         internal static bool diwendqndnq;
         private async Task Inicializar1()
         {
-            //await Task.Run(async () =>
-            //{
-
             console_RichTextBox.Document.Blocks.Clear();
-            //console_RichTextBox.set
             InternalConsolePrint("UI started", console_RichTextBox, Colors.Purple);
-            //Left = (screenWidth - Width) / 2.0;
-            //Top = (screenHeight - Height) / 2.0;
-
-
-            
             MainWin.Hide();
 
             Moveinitprogress(10);
             diwendqndnq = true;
-            DebugProtect3.HideOSThreads();
 
             try
             {
-                //este código é rodado apenas uma vez
                 if (!inicializado2)
                 {
-                    //await Task.Delay(1000);
-
                     try
                     {
                         RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", writable: true);
@@ -3282,10 +3062,31 @@ namespace Essence
                     {
                     }
 
-                    info = "";
+                    ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_SystemEnclosure");
 
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        if (obj["ChassisTypes"] != null)
+                        {
+                            var chassisTypes = (ushort[])obj["ChassisTypes"];
+                            foreach (var type in chassisTypes)
+                            {
+                                if (type == 8 || type == 9 || type == 10)
+                                {
+                                    InternalUserData.pctypeshit = "Notebook";
+                                    break;
+                                }
+                                else
+                                {
+                                    InternalUserData.pctypeshit = "Desktop";
+                                }
+                            }
+                        }
+                    }
 
                     InternalConsolePrint("Connecting to server...", console_RichTextBox, Colors.Gray);
+
+                    Communications.START();
 
                     Communications.MODIFY += async delegate
                     {
@@ -3337,8 +3138,6 @@ namespace Essence
                         }
                     };
 
-
-                    bool returnk = false;
                     Communications.Cancel_Error += async delegate
                     {
                         if (!NET && !OFF)
@@ -3387,7 +3186,6 @@ namespace Essence
                         //    TabControl.Visibility = Visibility.Visible;
                         //}
                     };
-                    DebugProtect3.HideOSThreads();
 
                     if (Properties.Settings.Default.Language == "null")
                     {
@@ -3426,25 +3224,13 @@ namespace Essence
                             break;
                     }
                     TransL();
-
-                    using (RegistryKey key = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Evo3Software"))
-                    {
-                        if (key.GetValueNames().Contains("FirstRegister"))
-                        {
-                            Communications.firstlogin = false;
-                        }
-                    }
-                    
-                    int ggs = DebugProtect1.PerformChecks();                    
-
                     AddText(lm.Translate("Connecting"));
 
                     DateTime time = DateTime.Now;
                     var task1 = Task.Delay(4000);
                     var task2 = Task.Delay(8000);
                     var task3 = Task.Delay(10000);
-                    var operationTask = Communications.RequestResource("info");
-
+                    var operationTask = Communications.RequestResource("getversions");
                     var completedTask = await Task.WhenAny(operationTask, task1);
 
                     try
@@ -3469,12 +3255,6 @@ namespace Essence
                     JObject servjson = JObject.Parse(await operationTask);
                     double secondsElapsed = (DateTime.Now - time).TotalSeconds;
 
-                    if (ggs == 1)
-                    {
-                        MessageBox.Show("Critical error when loading server response", "Uhh");
-                        Process.GetCurrentProcess().Kill();
-                    }
-
                     if (StopAllInteractions)
                         return;
 
@@ -3490,12 +3270,9 @@ namespace Essence
                             MessageBox.Show("Essence is currently undergoing maintenance. Please check back later. We need a little time to apply the changes...", "We apologize for the inconvenience");
                         else
                             MessageBox.Show(servjson["maintence"]["message"].Value<string>(), "We apologize for the inconvenience");
-                        
+
                         Process.GetCurrentProcess().Kill();
                     }
-
-
-                    int ggs2 = DebugProtect2.PerformChecks();
 
                     try
                     {
@@ -3554,7 +3331,7 @@ namespace Essence
                                 //car999.Visibility = Visibility.Visible;
 
 
-                                WebStuff2.DownloadFileAsync(new Uri(await Communications.Get("upd")), "EssenceUpdater.exe");
+                                WebStuff2.DownloadFileAsync(new Uri("https://essenceapi.discloud.app/externals/v1/updater"), "EssenceUpdater.exe");
                             }
                             catch (Exception ex)
                             {
@@ -3575,14 +3352,57 @@ namespace Essence
                         Process.GetCurrentProcess().Kill();
                     }
 
-                    if((servjson["userdata"]?["user_id"]?.Value<string>() ?? "null") == "null")
+
+                    string loginr = await Communications.RequestResource("login");
+                    servjson = JObject.Parse(loginr);
+                    if (servjson["status"].ToString() == "failed")
+                    {
+                        switch (servjson["message"].ToString())
+                        {
+                            case "verification-pending":
+                                await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                                MessageBox.Show("Your verification failed somehow. Please login again");
+                                break;
+
+                            case "new-location-detected":
+                                await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                                MessageBox.Show("New location detected. Enter again in your account and we're going to send an code");
+                                break;
+
+                            case "multiple-machines-using-this-account":
+                                await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                                MessageBox.Show("Other machine is aready using this account");
+                                break;
+
+                            case "incorect-password":
+                                await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                                MessageBox.Show("It looks like your password has been changed. Please log back into your account.");
+                                break;
+
+                            case "user-not-found":
+                                await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                                MessageBox.Show("Your login is no longer in our systems. Please create an new account.");
+                                break;
+
+                            default:
+                                await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                                MessageBox.Show(servjson["message"].ToString(), "Internal Server Error. Try Again");
+                                break;
+                        }
+                        Settings.Default.Token = "null";
+                        RestartApp(false);
+                    }
+
+                    if ((servjson["userdata"]?["user_id"]?.Value<string>() ?? "null") == "null")
                     {
                         AddText(lm.Translate("Preparing Login Screen..."));
                         Moveinitprogress(100);
-
                         await Task.Delay(1000);
                         AnimateUI(welcome: true);
+                        return;
                     }
+
+                    InternalUserData = JsonConvert.DeserializeObject<UserData>(loginr);
 
                     if ((servjson["userdata"]["banned"]?.Value<string>() ?? "true") == "true")
                     {
@@ -3595,6 +3415,234 @@ namespace Essence
                     AddText(lm.Translate("Loading User Data"));
                     Moveinitprogress(55);
 
+                    bool confirmada = false;
+
+                    try
+                    {
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            ProfileSettings.dn32un3cr329c8n3.Text = servjson["userdata"]["login"].ToString();
+                            user_r = servjson["userdata"]["user_role"]?.Value<int>() ?? 20;
+                            if (user_r < 6)
+                            {
+                                confirmada = true;
+                                premium = true;
+                                ProfileSettings.dudu3nud3nud.Text = "Yes";
+                                ProfileSettings.subscription_typetxt.Text = "Premium";
+                                OHHHHH = true;
+                            }
+
+
+                            switch (user_r)
+                            {
+                                case 0:
+                                    userrolllee.Text = "Owner";
+                                    ProfileSettings.dn3u2ndu2d3n.Text = "Owner";
+                                    break;
+
+                                case 1:
+                                    userrolllee.Text = "Developer";
+                                    ProfileSettings.dn3u2ndu2d3n.Text = "Developer";
+                                    break;
+
+                                case 2:
+                                    userrolllee.Text = "Server Manager";
+                                    ProfileSettings.dn3u2ndu2d3n.Text = "Server Manager";
+                                    break;
+
+                                case 3:
+                                    userrolllee.Text = "ADM";
+                                    ProfileSettings.dn3u2ndu2d3n.Text = "ADM";
+                                    break;
+
+                                case 4:
+                                    userrolllee.Text = "Resellers";
+                                    ProfileSettings.dn3u2ndu2d3n.Text = "Resellers";
+                                    break;
+
+                                case 5:
+                                    userrolllee.Text = "Close Friend";
+                                    ProfileSettings.dn3u2ndu2d3n.Text = "Clsoe Friend";
+                                    break;
+
+                                case 6:
+                                    userrolllee.Text = "Beta Tester";
+                                    ProfileSettings.dn3u2ndu2d3n.Text = "Beta Tester";
+                                    break;
+
+                                case 20:
+                                    userrolllee.Text = "User";
+                                    ProfileSettings.dn3u2ndu2d3n.Text = "User";
+                                    Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                                    MessageBox.Show("Opsie! Essence is in BETA tests now. And M4A1 didint allowed this login to be used. Dm him if you're subscribed in beta tests. If not, just wait for our next release!", "Oh, sorry :(");
+                                    RestartApp(true);
+                                    return;
+                            }
+
+
+                            foreach (var maquina in InternalUserData.AuthorizedDevices)
+                            {
+                                string hwid = maquina.Hwid;
+                                var ultimoLogin = maquina.LastLogin.ToString();
+                                var lastlocation = maquina.LastLocation.ToString();
+                                var devicetyp = maquina.Device.ToString();
+
+                                if (hwid == Marshal.PtrToStringAnsi(Secure.GetHWID()))
+                                {
+                                    ProfileSettings.dn3un3undu3nu.Text = lastlocation;
+
+                                    if (devicetyp == "Notebook")
+                                        ProfileSettings.dy3bdhb3db.Data = Geometry.Parse("M23 18h-1V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v13H1c-.55 0-1 .45-1 1s.45 1 1 1h22c.55 0 1-.45 1-1s-.45-1-1-1m-9.5 0h-3c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h3c.28 0 .5.22.5.5s-.22.5-.5.5m6.5-3H4V6c0-.55.45-1 1-1h14c.55 0 1 .45 1 1z");
+                                }
+                                else
+                                {
+                                    Device lol = new Device();
+
+                                    DateTime lastLogin = DateTime.ParseExact(ultimoLogin, "dd-MM-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                                    DateTime lastLoginUtc = lastLogin.AddHours(3);
+                                    TimeSpan localOffset = TimeZoneInfo.Local.BaseUtcOffset;
+                                    DateTime localTime = lastLoginUtc.Add(localOffset);
+                                    lol.locationn.Text = lastlocation + " · " + GetTimeAgo(localTime);
+
+                                    if (devicetyp == "Notebook")
+                                        lol.computertype.Data = Geometry.Parse("M23 18h-1V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v13H1c-.55 0-1 .45-1 1s.45 1 1 1h22c.55 0 1-.45 1-1s-.45-1-1-1m-9.5 0h-3c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h3c.28 0 .5.22.5.5s-.22.5-.5.5m6.5-3H4V6c0-.55.45-1 1-1h14c.55 0 1 .45 1 1z");
+
+
+                                    ProfileSettings.rapedevices.Children.Add(lol);
+                                }
+                            }
+                        });
+
+                    }
+                    catch (Exception ex)
+                    {
+                        await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                        MessageBox.Show(ex.ToString(), "Error When Loading User Account. Sorry :(");
+                        RestartApp(true);
+                        return;
+                    }
+
+                    await Task.Delay(100);
+
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        AddText(lm.Translate("Checking Key..."));
+                    });
+
+                    await Task.Delay(100);
+
+                    if (!confirmada)
+                    {
+                        try
+                        {
+                            //PREMIUM KEY OK
+
+                            string keyinfo = await Communications.RequestResource("getkeyinfo", new { key = InternalUserData.Subscription });
+                            if (keyinfo != "key-expired" || keyinfo != "invalid-key" || keyinfo != "invalid-owner" || keyinfo != "key-not-found")
+                            {
+                                KeyInfo keyyy = JsonConvert.DeserializeObject<KeyInfo>(keyinfo);
+
+                                try
+                                {
+                                    await Dispatcher.InvokeAsync(() =>
+                                    {
+                                        ProfileSettings.key_expirationtxt.Text = keyyy.duration;
+                                        ProfileSettings.key_sellertxt.Text = keyyy.author;
+                                        ProfileSettings.sellerservertxt.Text = keyyy.support;
+                                        ProfileSettings.key_creation_date.Text = keyyy.CreationDate.ToString();
+
+                                        ProfileSettings.premiumkeytxt.Text = InternalUserData.Subscription.Substring(0, InternalUserData.Subscription.Length - 14) + "...";
+
+                                        stopdrag = false;
+                                        premium = true;
+                                        ProfileSettings.dudu3nud3nud.Text = "Yes";
+                                        ProfileSettings.subscription_typetxt.Text = "Premium";
+
+                                        key_expire2.Text = lm.Translate("Never");
+                                        ProfileSettings.key_expirationtxt.Text = lm.Translate("Lifetime");
+                                        TimeR(upd: false);
+
+                                        confirmada = true;
+
+                                        string time = keyyy.last;
+                                        if (time != "Perm" && time != "Erro")
+                                        {
+                                            TimeR(time.Split('.')[0]);
+                                        }
+                                        else if (time == "Perm")
+                                        {
+                                            key_expire2.Text = lm.Translate("Never");
+                                            ProfileSettings.key_expirationtxt.Text = lm.Translate("Lifetime");
+                                            TimeR(upd: false);
+                                        }
+                                        else
+                                        {
+                                            key_expire2.Text = lm.Translate("Error");
+                                            ProfileSettings.key_expirationtxt.Text = lm.Translate("Error");
+                                        }
+                                        emailtxt.Text = InternalUserData.Subscription;
+                                    });
+                                }
+                                catch
+                                {
+
+                                }
+                            }
+                            if (keyinfo == "invalid-owner")
+                            {
+                                await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
+                                MessageBox.Show("This key has already been redeemed and does not belong to your account. If this is an error, please report it to your seller.", "Warning");
+                                await Dispatcher.InvokeAsync(() => App.StartupWindow.Show());
+                            }
+
+
+
+                            //LINKVERTISE OK
+                            if (!confirmada && Secure.TimeLeft($"{localAppData}\\Essence\\userdata\\LinkvertiseKey.txt").TotalMilliseconds != 1)
+                            {
+                                await Dispatcher.InvokeAsync(() =>
+                                {
+                                    emailtxt.Text = lm.Translate("Linkvertise key");
+                                    ProfileSettings.key_expirationtxt.Text = lm.Translate("Linkvertise Key");
+
+                                    TimeR(upd: true);
+
+                                    stopdrag = false;
+                                    confirmada = true;
+                                });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.ToString());
+                        }
+
+
+                        if (!confirmada)
+                        {
+                            AddText(lm.Translate("Invalid Key!"));
+                            await Task.Delay(500);
+
+                            executor.Visibility = Visibility.Visible;
+                            ExecutorGrid.Visibility = Visibility.Collapsed;
+                            AnimateUI(true);
+
+                            JustAnChillWindow justAnChillWindow = new JustAnChillWindow();
+                            justAnChillWindow.Show();
+
+                            Fade(justAnChillWindow, 0, 1, 0.6);
+
+                            await Task.Delay(2000);
+                            this.Hide();
+                            return;
+                        }
+                        else
+                        {
+                            await Task.Delay(50);
+                            AddText(lm.Translate("Loading Settings"));
+                        }
+                    }
+
                     if (!Directory.Exists($"{localAppData}\\Essence"))
                         Directory.CreateDirectory($"{localAppData}\\Essence");
 
@@ -3604,24 +3652,7 @@ namespace Essence
                     if (!Directory.Exists($"{localAppData}\\Essence\\userdata"))
                         Directory.CreateDirectory($"{localAppData}\\Essence\\userdata");
 
-                    if (!File.Exists($"{localAppData}\\Essence\\userdata\\logindata.txt"))
-                    {
-                        List<string> linhas4 = new List<string>();
-                        while (linhas4.Count < 6)
-                        {
-                            linhas4.Add("null");
-                        }
-                        File.WriteAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt", linhas4);
-                        await Task.Delay(400);
-                    }
-
                     await Task.Delay(50);
-                    List<string> linhas = new List<string>(File.ReadAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt"));
-                    while (linhas.Count < 6)
-                    {
-                        linhas.Add("null");
-                    }
-                    File.WriteAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt", linhas);
 
                     if (Properties.Settings.Default.TopMost)
                     {
@@ -3639,18 +3670,6 @@ namespace Essence
                     {
                         File.CreateText($"{localAppData}\\Essence\\userdata\\GameHistory.txt");
                     }
-
-                    if ()
-                    {
-                        firstboot = true;
-                    }
-
-                    if (ggs2 == 1)
-                    {
-                        MessageBox.Show("Executor Could not load registry values", "ops");
-                        Process.GetCurrentProcess().Kill();
-                    }
-
 
                     if (Properties.Settings.Default.ShowChangelog)
                     {
@@ -3675,10 +3694,6 @@ namespace Essence
 
                     Topbar.Visibility = Visibility.Collapsed;
 
-
-
-                    ggs = DebugProtect1.PerformChecks();
-
                     AddText(lm.Translate("Getting Roblox Info"));
                     Moveinitprogress(75);
 
@@ -3698,23 +3713,7 @@ namespace Essence
                             {
                                 RobloxPlayerID = PrintValue("userId", text);
                                 roblox_look_finished = true;
-
-                                linhas = new List<string>(File.ReadAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt"));
-                                linhas[3] = RobloxPlayerID;
-                                File.WriteAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt", linhas);
-
-                                if (info.Contains(RobloxPlayerID))
-                                {
-                                    if (!KeyGay2.Roblox_IDS.Contains(RobloxPlayerID))
-                                    {
-                                        if (KeyGay2.Roblox_IDS.Length > 0)
-                                            KeyGay2.Roblox_IDS += ", ";
-
-                                        KeyGay2.Roblox_IDS += RobloxPlayerID;
-                                    }
-
-                                    ShowBa(RobloxPlayerID);
-                                }
+                                general.RobloxId = RobloxPlayerID;
                             }
                         }
                         catch
@@ -3735,13 +3734,7 @@ namespace Essence
                         }
 
 
-                            Mudar_Imagem(Properties.Settings.Default.Avatar);
-                        else
-                        {
-                            Mudar_Imagem("https://i.imgur.com/hxNqiz8.png");
-                        }
-
-
+                        Mudar_Imagem(Properties.Settings.Default.Avatar);
                         Mudar_Nome(Properties.Settings.Default.Name);
                     });
 
@@ -3751,394 +3744,7 @@ namespace Essence
 
                     await Task.Delay(50);
 
-                    if (ggs == 1)
-                    {
-                        Process.GetCurrentProcess().Kill();
-                    }
-
-                    //await Task.Delay(1100);
-                    bool confirmada = false;
                     stopdrag = true;
-
-                    //if (!offline_mode_enabled)
-                    //{
-
-                    AddText(lm.Translate("Checking Login"));
-                    Moveinitprogress(85);
-
-                    InternalConsolePrint("[STARTUP] Checking login & subscription...", console_RichTextBox, Colors.Yellow);
-
-                    try
-                    {
-                        await Task.Run(async () =>
-                        {
-                            if (File.Exists($"{localAppData}\\Essence\\userdata\\logindata.txt"))
-                            {
-                                List<string> linhasO = new List<string>(File.ReadAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt"));
-
-                                if(linhasO[0].Length < 5 && linhasO[2].Length < 10)
-                                {
-                                    await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                    try { File.Delete($"{localAppData}\\Essence\\userdata\\logindata.txt"); } catch { }
-                                    registryKey1.SetValue("Boot", "1");
-
-                                    RestartApp(false);
-                                    return;
-                                }
-                                                                
-                                string response = await Communications.Get("login", linhasO[0] + "\n" + linhasO[1] + "\n" + linhasO[2] + "\n" + Properties.Settings.Default.Name + "\n" + Properties.Settings.Default.Avatar);
-                                try
-                                {
-                                    var userData = JsonConvert.DeserializeObject<Dictionary<string, object>>(response);
-                                    if (userData != null && userData.ContainsKey("email"))
-                                    {
-                                        KeyGay2.current_user = linhasO[0];
-                                        KeyGay2.current_pass = linhasO[1];
-
-                                       
-
-                                        //try
-                                        //{
-                                        //    if (userData["allowed"].ToString() == "false")
-                                        //    {
-                                        //        await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                        //        MessageBox.Show("Opsie! Essence is in BETA tests now. And M4A1 didint allowed this login to be used. Dm him if you're subscribed in beta tests. If not, just wait for our next release!", "Oh, sorry :(");
-                                        //        RestartApp();
-                                        //    }
-                                        //}
-                                        //catch
-                                        //{
-                                        //    await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                        //    MessageBox.Show("Opsie! Essence is in BETA tests now. And M4A1 didint allowed this login to be used. Dm him if you're subscribed in beta tests. If not, just wait for our next release!", "Oh, sorry :(");
-                                        //    RestartApp();
-                                        //}
-
-                                        //MessageBox.Show(JsonConvert.SerializeObject(userData, Newtonsoft.Json.Formatting.Indented));
-
-                                        try
-                                        {
-                                            await Dispatcher.InvokeAsync(() =>
-                                            {
-
-                                                ProfileSettings.dn32un3cr329c8n3.Text = linhasO[0];
-                                                user_r = Convert.ToInt32(userData["user_role"].ToString());
-                                                KeyGay2.invitecode = userData["user_id"].ToString();
-                                                KeyGay2.invites = Convert.ToInt32(userData["invites"].ToString());
-                                                inviteeesss.Text = KeyGay2.invites.ToString();
-                                                ProfileSettings.invitestxt.Text = KeyGay2.invites.ToString();
-
-
-                                                ProfileSettings.invitationIDtxt.Text = KeyGay2.invitecode;
-
-                                                if (user_r < 6)
-                                                {
-                                                    confirmada = true;
-                                                    premium = true;
-                                                    ProfileSettings.dudu3nud3nud.Text = "Yes";
-                                                    ProfileSettings.subscription_typetxt.Text = "Premium";
-                                                    OHHHHH = true;
-                                                }
-
-
-                                                switch (user_r)
-                                                {
-                                                    case 0:
-                                                        userrolllee.Text = "Owner";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "Owner";
-                                                        break;
-
-                                                    case 1:
-                                                        userrolllee.Text = "Developer";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "Developer";
-                                                        break;
-
-                                                    case 2:
-                                                        userrolllee.Text = "Server Manager";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "Server Manager";
-                                                        break;
-
-                                                    case 3:
-                                                        userrolllee.Text = "ADM";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "ADM";
-                                                        break;
-
-                                                    case 4:
-                                                        userrolllee.Text = "Resellers";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "Resellers";
-                                                        break;
-
-                                                    case 5:
-                                                        userrolllee.Text = "Close Friend";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "Clsoe Friend";
-                                                        break;
-
-                                                    case 6:
-                                                        userrolllee.Text = "Beta Tester";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "Beta Tester";
-                                                        break;
-
-                                                    case 20:
-                                                        userrolllee.Text = "User";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "User";
-                                                        Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                                        MessageBox.Show("Opsie! Essence is in BETA tests now. And M4A1 didint allowed this login to be used. Dm him if you're subscribed in beta tests. If not, just wait for our next release!", "Oh, sorry :(");
-                                                        RestartApp(true);
-                                                        return;
-
-                                                    case 69:
-                                                        confirmada = true;
-                                                        premium = true;
-                                                        ProfileSettings.dudu3nud3nud.Text = "Yes";
-                                                        ProfileSettings.subscription_typetxt.Text = "Premium";
-                                                        OHHHHH = true;
-                                                        userrolllee.Text = "Kayne West";
-                                                        ProfileSettings.dn3u2ndu2d3n.Text = "Kayne West";
-                                                        break;
-                                                }
-
-
-                                                JArray maquinasAutorizadas = JArray.Parse(userData["authorized_devices"].ToString());
-                                                foreach (var maquina in maquinasAutorizadas)
-                                                {
-                                                    string hwid = maquina["hwid"].ToString();
-                                                    var ultimoLogin = maquina["last_login"].ToString();
-                                                    var lastlocation = maquina["last_location"].ToString();
-                                                    var devicetyp = maquina["device"].ToString();
-
-                                                    if (hwid == Secure.GetHWID())
-                                                    {
-                                                        ProfileSettings.dn3un3undu3nu.Text = lastlocation;
-
-                                                        if(KeyGay2.pctypeshit == "Notebook")
-                                                            ProfileSettings.dy3bdhb3db.Data = Geometry.Parse("M23 18h-1V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v13H1c-.55 0-1 .45-1 1s.45 1 1 1h22c.55 0 1-.45 1-1s-.45-1-1-1m-9.5 0h-3c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h3c.28 0 .5.22.5.5s-.22.5-.5.5m6.5-3H4V6c0-.55.45-1 1-1h14c.55 0 1 .45 1 1z");
-                                                    }
-                                                    else
-                                                    {
-                                                        Device lol = new Device();
-
-                                                        DateTime lastLogin = DateTime.ParseExact(ultimoLogin, "dd-MM-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                                                        DateTime lastLoginUtc = lastLogin.AddHours(3);
-                                                        TimeSpan localOffset = TimeZoneInfo.Local.BaseUtcOffset;
-                                                        DateTime localTime = lastLoginUtc.Add(localOffset);
-                                                        lol.locationn.Text = lastlocation + " · " + GetTimeAgo(localTime);
-
-                                                        if(maquina["device"].ToString() == "Notebook")
-                                                            lol.computertype.Data = Geometry.Parse("M23 18h-1V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v13H1c-.55 0-1 .45-1 1s.45 1 1 1h22c.55 0 1-.45 1-1s-.45-1-1-1m-9.5 0h-3c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h3c.28 0 .5.22.5.5s-.22.5-.5.5m6.5-3H4V6c0-.55.45-1 1-1h14c.55 0 1 .45 1 1z");
-
-
-                                                        ProfileSettings.rapedevices.Children.Add(lol);
-                                                    }
-                                                }
-                                            });
-
-                                        }
-                                        catch(Exception ex)
-                                        {
-                                            await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                            MessageBox.Show(ex.ToString(), "Error When Loading User Account. Sorry :(");
-                                            RestartApp(true);
-                                            return;
-                                        }
-
-                                        await Task.Delay(100);
-
-                                        await Dispatcher.InvokeAsync(() =>
-                                        {
-                                            AddText(lm.Translate("Checking Key..."));
-                                        });
-
-                                        await Task.Delay(100);
-
-                                        if (!confirmada)
-                                        {
-                                            try
-                                            {
-                                                //PREMIUM KEY OK
-                                                string logins = await Communications.Get("check", userData["subscription"].ToString() + "\n" + linhasO[0]);
-
-                                                if (logins.Split('\n').Length > 4)
-                                                {
-                                                    string[] data = logins.Split('\n');
-
-                                                    try
-                                                    {
-                                                        await Dispatcher.InvokeAsync(() =>
-                                                        {
-                                                            ProfileSettings.key_expirationtxt.Text = data[4];
-                                                            ProfileSettings.key_sellertxt.Text = data[2];
-                                                            ProfileSettings.sellerservertxt.Text = data[3];
-                                                            ProfileSettings.key_creation_date.Text = data[1];
-
-                                                            premiumkey = userData["subscription"].ToString();
-                                                            ProfileSettings.premiumkeytxt.Text = premiumkey.Substring(0, premiumkey.Length - 14) + "...";
-
-                                                            stopdrag = false;
-                                                            premium = true;
-                                                            ProfileSettings.dudu3nud3nud.Text = "Yes";
-                                                            ProfileSettings.subscription_typetxt.Text = "Premium";                                                            
-                                                            confirmada = true;
-                                                        });
-                                                    }
-                                                    catch
-                                                    {
-
-                                                    }
-                                                }
-                                                else if (logins == "outro")
-                                                {
-                                                    await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                                    MessageBox.Show("This key has already been redeemed and does not belong to your account. If this is an error, please report it to your seller.", "Warning");
-                                                    await Dispatcher.InvokeAsync(() => App.StartupWindow.Show());
-                                                }
-
-                                                //LINKVERTISE OK
-                                                if (!confirmada && KeyGay2.TimeLeft($"{localAppData}\\Essence\\userdata\\LinkvertiseKey.txt").TotalMilliseconds != 1)
-                                                {
-                                                    await Dispatcher.InvokeAsync(() =>
-                                                    {
-                                                        stopdrag = false;
-                                                        confirmada = true;
-                                                    });
-                                                }
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                MessageBox.Show(ex.ToString());
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        MessageBox.Show("Erro no login. Detalhes: " + response);
-                                        Process.GetCurrentProcess().Kill();
-                                    }
-                                }
-                                catch (JsonException)
-                                {
-                                    switch (response)
-                                    {
-                                        //clear all login data and restart
-                                        
-                                        case "verification-pending":
-                                            await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                            MessageBox.Show("Your verification failed somehow. Please login again");
-                                            break;
-
-                                        case "new-location-detected":
-                                            await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                            MessageBox.Show("New location detected. Enter again in your account and we're going to send an code");
-                                            break;
-
-                                        case "multiple-machines-using-this-account":
-                                            await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                            MessageBox.Show("Other machine is aready using this account");
-                                            break;
-
-                                        case "incorect-password":
-                                            await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                            MessageBox.Show("It looks like your password has been changed. Please log back into your account.");
-                                            break;
-
-                                        case "user-not-found":
-                                            await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                            MessageBox.Show("Your login is no longer in our systems. Please create an new account.");
-                                            break;
-
-                                        default:
-                                            await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-                                            MessageBox.Show(response, "Internal Server Error. Try Again");
-                                            break;
-                                    }
-
-
-                                    try { File.Delete($"{localAppData}\\Essence\\userdata\\logindata.txt"); } catch { }
-                                    registryKey1.SetValue("Boot", "1");
-
-
-                                    RestartApp(false);
-                                    return;
-                                }
-                                catch (Exception ex)
-                                {
-                                    await Dispatcher.InvokeAsync(() => App.StartupWindow.Hide());
-
-                                    MessageBox.Show(ex.ToString());
-
-
-                                    try { File.Delete($"{localAppData}\\Essence\\userdata\\logindata.txt"); } catch { }
-                                    registryKey1.SetValue("Boot", "1");
-
-
-                                    RestartApp(false);
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                registryKey1.SetValue("Boot", "1");
-                                RestartApp(false);
-                                return;
-                            }
-                        });
-                    }
-                    catch
-                    {
-                        KeyGay2.current_user = "";
-                        KeyGay2.current_pass = "";
-
-                        try
-                        {
-                            List<string> linhas2 = new List<string>(File.ReadAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt"));
-                            linhas2[0] = "null";
-                            linhas2[1] = "null";
-                            File.WriteAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt", linhas2);
-                        }
-                        catch
-                        {
-                            try { File.Delete($"{localAppData}\\Essence\\userdata\\logindata.txt"); } catch { }
-                        }
-                    }
-                    //}
-                    //else
-                    //{
-                    //    stopdrag = false;
-                    //    premium = true;
-                    //    confirmada = true;
-                    //    premiumkey = "M4A1_Debug";
-                    //}
-                    ggs2 = DebugProtect2.PerformChecks();
-
-
-                    if (StopAllInteractions)
-                        return;
-
-                    if (!confirmada)
-                    {
-                        AddText(lm.Translate("Invalid Key!"));
-                        await Task.Delay(500);
-
-                        executor.Visibility = Visibility.Visible;
-                        ExecutorGrid.Visibility = Visibility.Collapsed;
-                        AnimateUI(true);
-
-                        JustAnChillWindow justAnChillWindow = new JustAnChillWindow();
-                        justAnChillWindow.Show();
-
-                        Fade(justAnChillWindow, 0, 1, 0.6);
-
-                        await Task.Delay(2000);
-                        this.Hide();
-                        return;
-                    }
-                    else
-                    {
-                        await Task.Delay(50);
-                        AddText(lm.Translate("Loading Settings"));
-                    }
-
-                    if (ggs2 == 1)
-                        Process.GetCurrentProcess().Kill();
-
                     inicializado2 = true;
                 }
             }
@@ -4260,25 +3866,6 @@ namespace Essence
                                         {
                                             TextBox aitxtx = AI_RESPONSE();
                                             aitxtx.Text = dialogo[1];
-
-                                            //if (dialogo[1].Contains("```lua"))
-                                            //{
-                                            //    aitxtx.Text = dialogo[1].Split(new string[] { "```lua" + Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0].TrimStart().TrimEnd();
-
-                                            //    last_ai_output =
-                                            //        //"--[[\n" +
-                                            //        //dialogo[1].Split(new string[] { "```lua" + Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0].TrimStart() +
-                                            //        //"]]" +
-                                            //        //Environment.NewLine +
-                                            //        //Environment.NewLine +
-                                            //        dialogo[1].Split(new string[] { "```lua" + Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[1].Replace("```", "");
-                                            //}
-                                            //else
-                                            //{
-                                            //    aitxtx.Text = dialogo[1];
-                                            //    aitxtx.Text = aitxtx.Text.Trim();
-                                            //    aitxtx.Text = aitxtx.Text.Trim('\n');
-                                            //}
                                         }
                                     }
                                     catch { }
@@ -4300,64 +3887,6 @@ namespace Essence
                 Moveinitprogress(100);
 
                 AddText(lm.Translate("Loading Customizations"));
-
-                if (StopAllInteractions)
-                    return;
-
-
-                if (premium && !OHHHHH)
-                {
-                    //if (premiumkey != "Essence lol2")
-                    //{
-                    string time = await Communications.Get("KeyRes", premiumkey, force_return: true);
-
-                    if (StopAllInteractions)
-                        return;
-
-                    if (time != "Perm" && time != "Erro")
-                    {
-                        TimeR(time.Split('.')[0]);
-                    }
-                    else if (time == "Perm")
-                    {
-                        key_expire2.Text = lm.Translate("Never");
-                        ProfileSettings.key_expirationtxt.Text = lm.Translate("Lifetime");
-                        TimeR(upd: false);
-                    }
-                    else
-                    {
-                        key_expire2.Text = lm.Translate("Error");
-                        ProfileSettings.key_expirationtxt.Text = lm.Translate("Error");
-                    }
-                    //}
-                    //else
-                    //{
-                    //    key_expire2.Text = lm.Translate("Never (Debug)");
-                    //    AdminPanel.Visibility = Visibility.Visible;
-                    //}
-
-
-                    //email_key.Text = "Key:";
-                    emailtxt.Text = premiumkey;
-                }
-                else if (OHHHHH)
-                {
-                    key_expire2.Text = lm.Translate("Never");
-                    ProfileSettings.key_expirationtxt.Text = lm.Translate("Lifetime");
-                    TimeR(upd: false);
-                }
-                else
-                {
-                    //email_key.Text = "Key:";
-                    emailtxt.Text = lm.Translate("Linkvertise key");
-                    ProfileSettings.key_expirationtxt.Text = lm.Translate("Linkvertise Key");
-
-                    TimeR(upd: true);
-                }
-
-                if (StopAllInteractions)
-                    return;
-
                 ExecutionTasks();
             }
             catch (Exception ex)
@@ -4399,11 +3928,11 @@ namespace Essence
             //B1c.BeginAnimationP(GradientStop.OffsetProperty, gradilolanim);
             //B1c.Color = Color.FromRgb(200, 20, 20);
 
-            _mediaPlayer = new MediaPlayer();     
+            _mediaPlayer = new MediaPlayer();
 
 
             if (Properties.Settings.Default.Background != "null")
-                LoadBackg(Properties.Settings.Default.Background);            
+                LoadBackg(Properties.Settings.Default.Background);
 
             ChooseTyp.Visibility = Visibility.Collapsed;
             AddText(lm.Translate("Starting UI"));
@@ -4444,51 +3973,51 @@ namespace Essence
             selectedscriptinfoborder.Visibility = Visibility.Collapsed;
 
 
-            if (KeyGay2.firstlogin && false)
-            {
-                ChooseTyp.Visibility = Visibility.Visible;
+            //if (KeyGay2.firstlogin && false)
+            //{
+            //    ChooseTyp.Visibility = Visibility.Visible;
 
-                //DoubleAnimation angleAnimation = new DoubleAnimation
-                //{
-                //    From = -20.0,
-                //    To = 20.0,
-                //    Duration = new Duration(TimeSpan.FromMilliseconds(4000)),
-                //    AutoReverse = true,
-                //    RepeatBehavior = RepeatBehavior.Forever
-                //};
-                //hexagonangle1.BeginAnimation(RotateTransform.AngleProperty, angleAnimation);
-                DoubleAnimation angleAnimation2 = new DoubleAnimation
-                {
-                    From = 230,
-                    To = 260,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(2000)),
-                    AutoReverse = true,
-                    RepeatBehavior = RepeatBehavior.Forever
-                };
-                fuckhexagon1.BeginAnimationP(WidthProperty, angleAnimation2, DispatcherPriority.Background);
+            //    //DoubleAnimation angleAnimation = new DoubleAnimation
+            //    //{
+            //    //    From = -20.0,
+            //    //    To = 20.0,
+            //    //    Duration = new Duration(TimeSpan.FromMilliseconds(4000)),
+            //    //    AutoReverse = true,
+            //    //    RepeatBehavior = RepeatBehavior.Forever
+            //    //};
+            //    //hexagonangle1.BeginAnimation(RotateTransform.AngleProperty, angleAnimation);
+            //    DoubleAnimation angleAnimation2 = new DoubleAnimation
+            //    {
+            //        From = 230,
+            //        To = 260,
+            //        Duration = new Duration(TimeSpan.FromMilliseconds(2000)),
+            //        AutoReverse = true,
+            //        RepeatBehavior = RepeatBehavior.Forever
+            //    };
+            //    fuckhexagon1.BeginAnimationP(WidthProperty, angleAnimation2, DispatcherPriority.Background);
 
 
-                while (Properties.Settings.Default.UserPreference == "null")
-                {
-                    await Task.Delay(1500);
+            //    while (Properties.Settings.Default.UserPreference == "null")
+            //    {
+            //        await Task.Delay(1500);
 
-                    //var mousePosition = Mouse.GetPosition(Application.Current.MainWindow);
-                    //DoubleAnimation animX = new DoubleAnimation
-                    //{
-                    //    To = mousePosition.X - BlurRectangle.Width / 2,
-                    //    Duration = TimeSpan.FromSeconds(1)
-                    //};
+            //        //var mousePosition = Mouse.GetPosition(Application.Current.MainWindow);
+            //        //DoubleAnimation animX = new DoubleAnimation
+            //        //{
+            //        //    To = mousePosition.X - BlurRectangle.Width / 2,
+            //        //    Duration = TimeSpan.FromSeconds(1)
+            //        //};
 
-                    //DoubleAnimation animY = new DoubleAnimation
-                    //{
-                    //    To = mousePosition.Y - BlurRectangle.Height / 2,
-                    //    Duration = TimeSpan.FromSeconds(1)
-                    //};
+            //        //DoubleAnimation animY = new DoubleAnimation
+            //        //{
+            //        //    To = mousePosition.Y - BlurRectangle.Height / 2,
+            //        //    Duration = TimeSpan.FromSeconds(1)
+            //        //};
 
-                    //BlurRectangle.BeginAnimation(Canvas.LeftProperty, animX);
-                    //BlurRectangle.BeginAnimation(Canvas.TopProperty, animY);
-                }
-            }
+            //        //BlurRectangle.BeginAnimation(Canvas.LeftProperty, animX);
+            //        //BlurRectangle.BeginAnimation(Canvas.TopProperty, animY);
+            //    }
+            //}
             await Task.Delay(100);
 
             EvxIco.Visibility = Visibility.Collapsed;
@@ -4594,7 +4123,7 @@ namespace Essence
             currentMargin = CloseBtn.Margin;
             Move(CloseBtn, new Thickness(currentMargin.Left, -100, currentMargin.Right, currentMargin.Bottom), new Thickness(currentMargin.Left, currentMargin.Top, currentMargin.Right, currentMargin.Bottom), 1.3);
             await Task.Delay(80);
-            CloseBtn.Visibility = Visibility.Visible;           
+            CloseBtn.Visibility = Visibility.Visible;
 
 
 
@@ -4969,7 +4498,7 @@ namespace Essence
             Fade(thankss, 0, 1, 0.6);
             thankss.Text = "Thankyou!";
 
-            await Communications.Get("musiclike", force_return: true);
+            await Communications.RequestResource("musiclike", force_return: true);
 
             await Task.Delay(2000);
             Fade(thankss, 1, 0, 0.3);
@@ -4995,7 +4524,7 @@ namespace Essence
             Fade(thankss, 0, 1, 0.6);
             thankss.Text = "Skip voted!";
 
-            await Communications.Get("musicdeslike", force_return: true);
+            await Communications.RequestResource("musicdeslike", force_return: true);
 
             await Task.Delay(2000);
             Fade(thankss, 1, 0, 0.3);
@@ -5173,374 +4702,369 @@ namespace Essence
         }
 
         private bool ffmpeg_ok = false;
+        //internal static musicevent uuuuuuuuuuuu = new musicevent();
         private async void MusicPlayer()
         {
-            MusicPlayBorder2.IsEnabled = false;
-            while (StopAllInteractions == false)
-            {
-                if (File.Exists($"{localAppData}\\Essence\\bin\\ytdlp.exe"))
-                {
-                    try
-                    {
-                        string xxxy = xxx.Split(new string[] { "||||||||" }, StringSplitOptions.None)[2];
-                        if (xxxy == "nothing")
-                        {
-                            await IntermissionMusic();
-                        }
-                        else if (xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries).Length == 7)
-                        {
-                            string name = xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[0];
-                            string from = xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[1];
-                            string song = xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[2];
-                            string id = xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[3];
-                            string users = xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[4];
-                            string time = xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[5];
-                            string duration = xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[6];
-
-                            if (listening_users.Text != lm.Translate("Playlist Empty."))
-                                Dispatcher.Invoke(() => listening_users.Text = lm.Translate("users listening: ") + users);
-
-
-                            if (xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[3] != last_played_song && !loading_song)
-                            {
-                                loading_song = true;
-                                var stopwatch = Stopwatch.StartNew();
-
-                                try
-                                {
-                                    if (File.Exists($"{localAppData}\\Essence\\userdata\\Musics\\Music.mp4"))
-                                        File.Delete($"{localAppData}\\Essence\\userdata\\Musics\\Music.mp4");
-
-                                    //if (File.Exists($$"{localAppData}\\Essence\\userdata\\Musics\\Music.mp3"))
-                                    //    File.Delete($$"{localAppData}\\Essence\\userdata\\Musics\\Music.mp3");
-
-                                    //if (File.Exists($$"{localAppData}\\Essence\\userdata\\Musics\\Music.webm"))
-                                    //    File.Delete($$"{localAppData}\\Essence\\userdata\\Musics\\Music.webm");                                
-                                }
-                                catch { }
-
-                                MusicPlayBorder2.IsEnabled = false;
-                                if (isplaying_music)
-                                {
-                                    try { _mediaPlayer.MediaEnded -= _mediaPlayer_MediaEnded; } catch { }
-
-                                    music_progress_b.BeginAnimation(WidthProperty, null);
-                                    music_progress_b.Width = 0;
-
-                                    Playingtitle.Text = lm.Translate("Skipping music...");
-                                    listening_users.Text = lm.Translate("Loading Next...");
-                                    suggested.Text = lm.Translate("Join our music event for free key!");
-                                    await FadeMusic(3, false);
-
-                                }
-                                else
-                                {
-                                    PlayingMusicImage.Source = null;
-                                    gegergrggr.Visibility = Visibility.Visible;
-
-
-                                    music_progress_b.BeginAnimation(WidthProperty, null);
-                                    music_progress_b.Width = 0;
-
-                                    PlayingMusicImage.Width = 50;
-                                    PlayingMusicImage.Height = 50;
-                                    Playingtitle.Text = lm.Translate("Loading Next..."); /*lm.Translate("Intermission");*/
-                                    listening_users.Text = lm.Translate("Loading Next...");
-                                    suggested.Text = lm.Translate("Join our music event for free key!");
-                                }
-
-                                if (LastMovedGrid != HomeGrid)
-                                    Notificar("Loading Next Song: " + name);
-
-
-
-                                Move(ernerinernd, ernerinernd.Margin, new Thickness(10, -80, 0, 0), 0.7);
-                                await Task.Delay(100);
-                                Move(MusicPlayBorder2, MusicPlayBorder2.Margin, new Thickness(5, 0, 0, 0), 1.3);
-                                MusicPlayBorder2.Visibility = Visibility.Visible;
-
-
-                                LoadingMusicAn();
-
-                                //if (!File.Exists($"{localAppData}\\Essence\\ffmpeg\\ffmpeg.exe"))
-                                //{
-                                //    if (Directory.Exists($"{localAppData}\\Essence\\ffmpeg"))
-                                //    {
-                                //        Directory.Delete($"{localAppData}\\Essence\\ffmpeg", true);
-                                //    }
-
-                                //    Directory.CreateDirectory($"{localAppData}\\Essence\\ffmpeg");
-                                //    await Task.Run(() =>
-                                //    {
-                                //        using (WebClient client8 = new WebClient())
-                                //        {
-                                //            AsyncCompletedEventHandler fileCompletedHandler = async (s, e) =>
-                                //            {
-                                //                Dispatcher.Invoke(() =>
-                                //                {
-                                //                    EVXTXT.Text = $"Essence";
-                                //                });
-
-                                //                if (e.Error == null)
-                                //                {
-                                //                    await Task.Delay(2000);
-
-                                //                    ZipFile.ExtractToDirectory($"{localAppData}\\Essence\\ffmpeg\\ffmpeg.zip", $"{localAppData}\\Essence\\ffmpeg");
-                                //                    System.IO.File.Delete($"{localAppData}\\Essence\\ffmpeg\\ffmpeg.zip");
-                                //                    ffmpeg_ok = true;
-                                //                }
-                                //                else
-                                //                {
-                                //                    await Task.Delay(2000);
-                                //                    ffmpeg_ok = false;
-                                //                    Directory.Delete($"{localAppData}\\Essence\\ffmpeg");
-                                //                }
-                                //            };
-
-                                //            DownloadProgressChangedEventHandler progressChangedHandler = async (s, e) =>
-                                //            {
-                                //                Dispatcher.Invoke(() =>
-                                //                {
-                                //                    EVXTXT.Text = $"Essence: Downloading ffmpeg [{e.ProgressPercentage}%]";
-                                //                });
-                                //            };
-
-                                //            client8.DownloadProgressChanged += progressChangedHandler;
-                                //            client8.DownloadFileCompleted += fileCompletedHandler;
-
-                                //            client8.DownloadFileAsync(new Uri("https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffmpeg-6.1-win-64.zip"), $"{localAppData}\\Essence\\ffmpeg\\ffmpeg.zip");
-                                //        }
-                                //    });
-                                //}
-                                //else
-                                //    ffmpeg_ok = true;
-
-
-                                string extension;
-                                string arguments;
-                                //if (ffmpeg_ok)
-                                //{
-                                //    arguments = $@"""{song}"" -o "$"{localAppData}\Essence\Musics\Music.mp3"" --extract-audio --audio-format mp3 --audio-quality 0 --ffmpeg-location "$"{localAppData}\Essence\ffmpeg\ffmpeg.exe"" --no-check-certificate";
-                                //    extension = "mp3";
-                                //}
-                                //else
-                                //{
-                                arguments = $@"""{song}"" -o ""{localAppData}\Essence\userdata\Musics\Music.mp4"" -f ""mp4"" --no-check-certificate";
-                                extension = "mp4";
-                                //}
-
-
-
-                                Process process = new Process()
-                                {
-                                    StartInfo = new ProcessStartInfo()
-                                    {
-                                        FileName = @$"{localAppData}\Essence\bin\ytdlp.exe",
-                                        Arguments = arguments,
-                                        RedirectStandardOutput = true,
-                                        UseShellExecute = false,
-                                        CreateNoWindow = true
-                                    }
-                                };
-
-                                DataReceivedEventHandler handler = (DataReceivedEventHandler)(async (_, e) =>
-                                {
-                                    try
-                                    {
-                                        if (e.Data == null)
-                                            return;
-
-                                        string resp = e.Data.Trim();
-                                        if (resp.Contains("Downloading webpage"))
-                                        {
-                                            Dispatcher.Invoke(() =>
-                                            {
-                                                listening_users.Text = lm.Translate("Loading Next...") + " [12,5%]";
-                                                //RoundedPath.StrokeDashOffset = 218.75;
-                                            });
-                                        }
-                                        else if (resp.Contains("Downloading ios player API JSON"))
-                                        {
-                                            Dispatcher.Invoke(() =>
-                                            {
-                                                listening_users.Text = lm.Translate("Loading Next...") + " [25%]";
-                                                //RoundedPath.StrokeDashOffset = 187.5;                                            
-                                            });
-                                        }
-                                        else if (resp.Contains("Downloading mweb player API JSON"))
-                                        {
-                                            Dispatcher.Invoke(() =>
-                                            {
-                                                listening_users.Text = lm.Translate("Loading Next...") + " [37,5%]";
-                                                //RoundedPath.StrokeDashOffset = 156.25;
-                                            });
-                                        }
-                                        else if (resp.Contains("[download]") && resp.Contains("of"))
-                                        {
-                                            try
-                                            {
-                                                string progress = resp.Split(new string[] { "[download]" }, StringSplitOptions.None)[1];
-                                                progress = progress.Split(new string[] { "of" }, StringSplitOptions.RemoveEmptyEntries)[0];
-                                                progress = progress.Replace(" ", "").Replace("[", "").Replace("]", "").Replace("%", "").Replace(".", ",");
-
-                                                double numero = double.Parse(progress);
-                                                int prrr = (int)numero;
-
-                                                Dispatcher.Invoke(() =>
-                                                {
-                                                    listening_users.Text = lm.Translate("Loading Next...") + $" [{50 + (prrr / 2)}%]";
-                                                    //RoundedPath.StrokeDashOffset = 125 - (prrr * 1.25);
-                                                });
-                                                //await Task.Delay(10);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                Console.WriteLine($"Error parsing progress: {ex.Message}");
-                                            }
-                                        }
-                                    }
-                                    catch { }
-                                });
-
-                                await Task.Run(() =>
-                                {
-                                    process.Start();
-                                    process.BeginOutputReadLine();
-                                    process.OutputDataReceived += handler;
-                                    process.WaitForExit();
-                                });
-
-
-                                await Task.Delay(700);
-
-                                try
-                                {
-                                    gegergrggr.Visibility = Visibility.Collapsed;
-                                    if (id != "")
-                                    {
-                                        PlayingMusicImage.Source = new BitmapImage(new Uri($"https://i.ytimg.com/vi/{id}/sddefault.jpg"));
-                                        PlayingMusicImage.Width = 95;
-                                        PlayingMusicImage.Height = 83;
-                                    }
-                                    else
-                                    {
-                                        PlayingMusicImage.Width = 50;
-                                        PlayingMusicImage.Height = 50;
-                                        PlayingMusicImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/ImageResources/essencetheme1.png"));
-                                    }
-
-                                    suggested.Text = lm.Translate("Suggested by: ") + from;
-                                    listening_users.Text = lm.Translate("users listening: ") + users;
-                                    MusicPlayBorder2.IsEnabled = true;
-                                    musicdeslike.IsEnabled = true;
-                                    musiclike.IsEnabled = true;
-
-                                    isplaying_music = false;
-                                    cafeina_pra_neve = 1;
-                                    try { _mediaPlayer.Stop(); } catch { }
-                                    _mediaPlayer = null;
-
-                                    await Task.Delay(700);
-
-                                    Playingtitle.Text = name;
-                                    _mediaPlayer = new MediaPlayer();
-                                    _mediaPlayer.MediaEnded += _mediaPlayer_MediaEnded;
-
-                                    music_progress_b.BeginAnimation(WidthProperty, null);
-
-                                    if (_isMuted)
-                                        _mediaPlayer.IsMuted = true;
-                                    else
-                                        cafeina_pra_neve = 4;
-
-                                    _mediaPlayer.Volume = 0;
-                                    _mediaPlayer.Open(new Uri($"{localAppData}\\Essence\\userdata\\Musics\\Music.{extension}"));
-                                    _mediaPlayer.Play();
-
-                                    music_progress_b.Width = 0;
-                                }
-                                catch (Exception ex)
-                                {
-                                    //MessageBox.Show(ex.ToString(), "duwndiwnmdiwm");
-                                }
-                                loading_song = false;
-
-                                await Task.Delay(700);
-
-                                if (_mediaPlayer == null)
-                                    throw new Exception("Oof");
-
-
-
-                                try
-                                {
-                                    int durationInSeconds = int.Parse(duration);
-
-                                    stopwatch.Stop();
-                                    int timeElapsed = int.Parse(time) + (int)stopwatch.Elapsed.TotalSeconds;
-                                    int timeRemaining = durationInSeconds - timeElapsed;
-                                    double scale = (double)timeRemaining / (double)timeElapsed;
-                                    //MessageBox.Show($"Proporção: {scale}");
-
-
-                                    if (timeElapsed > 15)
-                                    {
-                                        _mediaPlayer.Position = TimeSpan.FromSeconds(timeElapsed);
-
-                                        double erm = timeRemaining / (double)durationInSeconds;
-                                        double eee = 155 - (155 * erm);
-
-                                        if (eee < 0)
-                                            eee = 0;
-
-                                        var animation = new DoubleAnimation
-                                        {
-                                            From = eee,
-                                            To = 155,
-                                            Duration = TimeSpan.FromSeconds(timeRemaining + 10)
-                                        };
-
-                                        music_progress_b.BeginAnimation(WidthProperty, animation);
-                                    }
-                                    else
-                                    {
-                                        var animation = new DoubleAnimation
-                                        {
-                                            From = 0,
-                                            To = 155,
-                                            Duration = TimeSpan.FromSeconds(durationInSeconds)
-                                        };
-
-                                        music_progress_b.BeginAnimation(WidthProperty, animation);
-                                    }
-
-
-                                    await FadeMusic(4, true);
-                                    last_played_song = id;
-                                    isplaying_music = true;
-
-
-                                    //await Task.Delay(4000);
-                                    //_mediaPlayer.Volume = 1;
-                                }
-                                catch (Exception ex)
-                                {
-                                    //MessageBox.Show(ex.ToString(), "e298jeed2imdid");
-                                    last_played_song = "1";
-                                    loading_song = false;
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        loading_song = false;
-                        last_played_song = "1";
-                        //MessageBox.Show(ex.ToString(), "wiedfimdnwamn");
-                    }
-                }
-                await Task.Delay(1500);
-            }
+            //MusicPlayBorder2.IsEnabled = false;
+            //while (StopAllInteractions == false)
+            //{
+            //    if (File.Exists($"{localAppData}\\Essence\\bin\\ytdlp.exe"))
+            //    {
+            //        try
+            //        {
+            //            string xxxyx = await Communications.RequestResource("getevents");
+            //            if (xxxy == "nothing")
+            //            {
+            //                await IntermissionMusic();
+            //            }
+            //            else if (xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries).Length == 7)
+            //            {                            
+            //                uuuuuuuuuuuu = JsonConvert.DeserializeObject<musicevent>(xxxyx);
+
+            //                if (listening_users.Text != lm.Translate("Playlist Empty."))
+            //                    Dispatcher.Invoke(() => listening_users.Text = lm.Translate("users listening: ") + users);
+
+
+            //                if (xxxy.Split(new string[] { "|||" }, StringSplitOptions.RemoveEmptyEntries)[3] != last_played_song && !loading_song)
+            //                {
+            //                    loading_song = true;
+            //                    var stopwatch = Stopwatch.StartNew();
+
+            //                    try
+            //                    {
+            //                        if (File.Exists($"{localAppData}\\Essence\\userdata\\Musics\\Music.mp4"))
+            //                            File.Delete($"{localAppData}\\Essence\\userdata\\Musics\\Music.mp4");
+
+            //                        //if (File.Exists($$"{localAppData}\\Essence\\userdata\\Musics\\Music.mp3"))
+            //                        //    File.Delete($$"{localAppData}\\Essence\\userdata\\Musics\\Music.mp3");
+
+            //                        //if (File.Exists($$"{localAppData}\\Essence\\userdata\\Musics\\Music.webm"))
+            //                        //    File.Delete($$"{localAppData}\\Essence\\userdata\\Musics\\Music.webm");                                
+            //                    }
+            //                    catch { }
+
+            //                    MusicPlayBorder2.IsEnabled = false;
+            //                    if (isplaying_music)
+            //                    {
+            //                        try { _mediaPlayer.MediaEnded -= _mediaPlayer_MediaEnded; } catch { }
+
+            //                        music_progress_b.BeginAnimation(WidthProperty, null);
+            //                        music_progress_b.Width = 0;
+
+            //                        Playingtitle.Text = lm.Translate("Skipping music...");
+            //                        listening_users.Text = lm.Translate("Loading Next...");
+            //                        suggested.Text = lm.Translate("Join our music event for free key!");
+            //                        await FadeMusic(3, false);
+
+            //                    }
+            //                    else
+            //                    {
+            //                        PlayingMusicImage.Source = null;
+            //                        gegergrggr.Visibility = Visibility.Visible;
+
+
+            //                        music_progress_b.BeginAnimation(WidthProperty, null);
+            //                        music_progress_b.Width = 0;
+
+            //                        PlayingMusicImage.Width = 50;
+            //                        PlayingMusicImage.Height = 50;
+            //                        Playingtitle.Text = lm.Translate("Loading Next..."); /*lm.Translate("Intermission");*/
+            //                        listening_users.Text = lm.Translate("Loading Next...");
+            //                        suggested.Text = lm.Translate("Join our music event for free key!");
+            //                    }
+
+            //                    if (LastMovedGrid != HomeGrid)
+            //                        Notificar("Loading Next Song: " + lol.);
+
+
+
+            //                    Move(ernerinernd, ernerinernd.Margin, new Thickness(10, -80, 0, 0), 0.7);
+            //                    await Task.Delay(100);
+            //                    Move(MusicPlayBorder2, MusicPlayBorder2.Margin, new Thickness(5, 0, 0, 0), 1.3);
+            //                    MusicPlayBorder2.Visibility = Visibility.Visible;
+
+
+            //                    LoadingMusicAn();
+
+            //                    //if (!File.Exists($"{localAppData}\\Essence\\ffmpeg\\ffmpeg.exe"))
+            //                    //{
+            //                    //    if (Directory.Exists($"{localAppData}\\Essence\\ffmpeg"))
+            //                    //    {
+            //                    //        Directory.Delete($"{localAppData}\\Essence\\ffmpeg", true);
+            //                    //    }
+
+            //                    //    Directory.CreateDirectory($"{localAppData}\\Essence\\ffmpeg");
+            //                    //    await Task.Run(() =>
+            //                    //    {
+            //                    //        using (WebClient client8 = new WebClient())
+            //                    //        {
+            //                    //            AsyncCompletedEventHandler fileCompletedHandler = async (s, e) =>
+            //                    //            {
+            //                    //                Dispatcher.Invoke(() =>
+            //                    //                {
+            //                    //                    EVXTXT.Text = $"Essence";
+            //                    //                });
+
+            //                    //                if (e.Error == null)
+            //                    //                {
+            //                    //                    await Task.Delay(2000);
+
+            //                    //                    ZipFile.ExtractToDirectory($"{localAppData}\\Essence\\ffmpeg\\ffmpeg.zip", $"{localAppData}\\Essence\\ffmpeg");
+            //                    //                    System.IO.File.Delete($"{localAppData}\\Essence\\ffmpeg\\ffmpeg.zip");
+            //                    //                    ffmpeg_ok = true;
+            //                    //                }
+            //                    //                else
+            //                    //                {
+            //                    //                    await Task.Delay(2000);
+            //                    //                    ffmpeg_ok = false;
+            //                    //                    Directory.Delete($"{localAppData}\\Essence\\ffmpeg");
+            //                    //                }
+            //                    //            };
+
+            //                    //            DownloadProgressChangedEventHandler progressChangedHandler = async (s, e) =>
+            //                    //            {
+            //                    //                Dispatcher.Invoke(() =>
+            //                    //                {
+            //                    //                    EVXTXT.Text = $"Essence: Downloading ffmpeg [{e.ProgressPercentage}%]";
+            //                    //                });
+            //                    //            };
+
+            //                    //            client8.DownloadProgressChanged += progressChangedHandler;
+            //                    //            client8.DownloadFileCompleted += fileCompletedHandler;
+
+            //                    //            client8.DownloadFileAsync(new Uri("https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffmpeg-6.1-win-64.zip"), $"{localAppData}\\Essence\\ffmpeg\\ffmpeg.zip");
+            //                    //        }
+            //                    //    });
+            //                    //}
+            //                    //else
+            //                    //    ffmpeg_ok = true;
+
+
+            //                    string extension;
+            //                    string arguments;
+            //                    //if (ffmpeg_ok)
+            //                    //{
+            //                    //    arguments = $@"""{song}"" -o "$"{localAppData}\Essence\Musics\Music.mp3"" --extract-audio --audio-format mp3 --audio-quality 0 --ffmpeg-location "$"{localAppData}\Essence\ffmpeg\ffmpeg.exe"" --no-check-certificate";
+            //                    //    extension = "mp3";
+            //                    //}
+            //                    //else
+            //                    //{
+            //                    arguments = $@"""{song}"" -o ""{localAppData}\Essence\userdata\Musics\Music.mp4"" -f ""mp4"" --no-check-certificate";
+            //                    extension = "mp4";
+            //                    //}
+
+
+
+            //                    Process process = new Process()
+            //                    {
+            //                        StartInfo = new ProcessStartInfo()
+            //                        {
+            //                            FileName = @$"{localAppData}\Essence\bin\ytdlp.exe",
+            //                            Arguments = arguments,
+            //                            RedirectStandardOutput = true,
+            //                            UseShellExecute = false,
+            //                            CreateNoWindow = true
+            //                        }
+            //                    };
+
+            //                    DataReceivedEventHandler handler = (DataReceivedEventHandler)(async (_, e) =>
+            //                    {
+            //                        try
+            //                        {
+            //                            if (e.Data == null)
+            //                                return;
+
+            //                            string resp = e.Data.Trim();
+            //                            if (resp.Contains("Downloading webpage"))
+            //                            {
+            //                                Dispatcher.Invoke(() =>
+            //                                {
+            //                                    listening_users.Text = lm.Translate("Loading Next...") + " [12,5%]";
+            //                                    //RoundedPath.StrokeDashOffset = 218.75;
+            //                                });
+            //                            }
+            //                            else if (resp.Contains("Downloading ios player API JSON"))
+            //                            {
+            //                                Dispatcher.Invoke(() =>
+            //                                {
+            //                                    listening_users.Text = lm.Translate("Loading Next...") + " [25%]";
+            //                                    //RoundedPath.StrokeDashOffset = 187.5;                                            
+            //                                });
+            //                            }
+            //                            else if (resp.Contains("Downloading mweb player API JSON"))
+            //                            {
+            //                                Dispatcher.Invoke(() =>
+            //                                {
+            //                                    listening_users.Text = lm.Translate("Loading Next...") + " [37,5%]";
+            //                                    //RoundedPath.StrokeDashOffset = 156.25;
+            //                                });
+            //                            }
+            //                            else if (resp.Contains("[download]") && resp.Contains("of"))
+            //                            {
+            //                                try
+            //                                {
+            //                                    string progress = resp.Split(new string[] { "[download]" }, StringSplitOptions.None)[1];
+            //                                    progress = progress.Split(new string[] { "of" }, StringSplitOptions.RemoveEmptyEntries)[0];
+            //                                    progress = progress.Replace(" ", "").Replace("[", "").Replace("]", "").Replace("%", "").Replace(".", ",");
+
+            //                                    double numero = double.Parse(progress);
+            //                                    int prrr = (int)numero;
+
+            //                                    Dispatcher.Invoke(() =>
+            //                                    {
+            //                                        listening_users.Text = lm.Translate("Loading Next...") + $" [{50 + (prrr / 2)}%]";
+            //                                        //RoundedPath.StrokeDashOffset = 125 - (prrr * 1.25);
+            //                                    });
+            //                                    //await Task.Delay(10);
+            //                                }
+            //                                catch (Exception ex)
+            //                                {
+            //                                    Console.WriteLine($"Error parsing progress: {ex.Message}");
+            //                                }
+            //                            }
+            //                        }
+            //                        catch { }
+            //                    });
+
+            //                    await Task.Run(() =>
+            //                    {
+            //                        process.Start();
+            //                        process.BeginOutputReadLine();
+            //                        process.OutputDataReceived += handler;
+            //                        process.WaitForExit();
+            //                    });
+
+
+            //                    await Task.Delay(700);
+
+            //                    try
+            //                    {
+            //                        gegergrggr.Visibility = Visibility.Collapsed;
+            //                        if (id != "")
+            //                        {
+            //                            PlayingMusicImage.Source = new BitmapImage(new Uri($"https://i.ytimg.com/vi/{id}/sddefault.jpg"));
+            //                            PlayingMusicImage.Width = 95;
+            //                            PlayingMusicImage.Height = 83;
+            //                        }
+            //                        else
+            //                        {
+            //                            PlayingMusicImage.Width = 50;
+            //                            PlayingMusicImage.Height = 50;
+            //                            PlayingMusicImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/ImageResources/essencetheme1.png"));
+            //                        }
+
+            //                        suggested.Text = lm.Translate("Suggested by: ") + from;
+            //                        listening_users.Text = lm.Translate("users listening: ") + users;
+            //                        MusicPlayBorder2.IsEnabled = true;
+            //                        musicdeslike.IsEnabled = true;
+            //                        musiclike.IsEnabled = true;
+
+            //                        isplaying_music = false;
+            //                        cafeina_pra_neve = 1;
+            //                        try { _mediaPlayer.Stop(); } catch { }
+            //                        _mediaPlayer = null;
+
+            //                        await Task.Delay(700);
+
+            //                        Playingtitle.Text = name;
+            //                        _mediaPlayer = new MediaPlayer();
+            //                        _mediaPlayer.MediaEnded += _mediaPlayer_MediaEnded;
+
+            //                        music_progress_b.BeginAnimation(WidthProperty, null);
+
+            //                        if (_isMuted)
+            //                            _mediaPlayer.IsMuted = true;
+            //                        else
+            //                            cafeina_pra_neve = 4;
+
+            //                        _mediaPlayer.Volume = 0;
+            //                        _mediaPlayer.Open(new Uri($"{localAppData}\\Essence\\userdata\\Musics\\Music.{extension}"));
+            //                        _mediaPlayer.Play();
+
+            //                        music_progress_b.Width = 0;
+            //                    }
+            //                    catch (Exception ex)
+            //                    {
+            //                        //MessageBox.Show(ex.ToString(), "duwndiwnmdiwm");
+            //                    }
+            //                    loading_song = false;
+
+            //                    await Task.Delay(700);
+
+            //                    if (_mediaPlayer == null)
+            //                        throw new Exception("Oof");
+
+
+
+            //                    try
+            //                    {
+            //                        int durationInSeconds = int.Parse(duration);
+
+            //                        stopwatch.Stop();
+            //                        int timeElapsed = int.Parse(time) + (int)stopwatch.Elapsed.TotalSeconds;
+            //                        int timeRemaining = durationInSeconds - timeElapsed;
+            //                        double scale = (double)timeRemaining / (double)timeElapsed;
+            //                        //MessageBox.Show($"Proporção: {scale}");
+
+
+            //                        if (timeElapsed > 15)
+            //                        {
+            //                            _mediaPlayer.Position = TimeSpan.FromSeconds(timeElapsed);
+
+            //                            double erm = timeRemaining / (double)durationInSeconds;
+            //                            double eee = 155 - (155 * erm);
+
+            //                            if (eee < 0)
+            //                                eee = 0;
+
+            //                            var animation = new DoubleAnimation
+            //                            {
+            //                                From = eee,
+            //                                To = 155,
+            //                                Duration = TimeSpan.FromSeconds(timeRemaining + 10)
+            //                            };
+
+            //                            music_progress_b.BeginAnimation(WidthProperty, animation);
+            //                        }
+            //                        else
+            //                        {
+            //                            var animation = new DoubleAnimation
+            //                            {
+            //                                From = 0,
+            //                                To = 155,
+            //                                Duration = TimeSpan.FromSeconds(durationInSeconds)
+            //                            };
+
+            //                            music_progress_b.BeginAnimation(WidthProperty, animation);
+            //                        }
+
+
+            //                        await FadeMusic(4, true);
+            //                        last_played_song = id;
+            //                        isplaying_music = true;
+
+
+            //                        //await Task.Delay(4000);
+            //                        //_mediaPlayer.Volume = 1;
+            //                    }
+            //                    catch (Exception ex)
+            //                    {
+            //                        //MessageBox.Show(ex.ToString(), "e298jeed2imdid");
+            //                        last_played_song = "1";
+            //                        loading_song = false;
+            //                    }
+            //                }
+            //            }
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            loading_song = false;
+            //            last_played_song = "1";
+            //            //MessageBox.Show(ex.ToString(), "wiedfimdnwamn");
+            //        }
+            //    }
+            //    await Task.Delay(1500);
+            //}
         }
 
         private async void _mediaPlayer_MediaEnded(object sender, EventArgs e)
@@ -5718,7 +5242,7 @@ namespace Essence
                         return;
                     }
                 }
-                catch(Exception ex) { MessageBox.Show(ex.ToString()); }
+                catch (Exception ex) { MessageBox.Show(ex.ToString()); }
 
                 try
                 {
@@ -5798,10 +5322,10 @@ namespace Essence
                         Task.Run(async () =>
                         {
                             await Dispatcher.InvokeAsync(async () =>
-                            {
-                                string kkk = await Communications.Get("scriptrating", scriptttttttttttttt.slug, force_return: true);
+                            {                                
                                 try
                                 {
+                                    string kkk = await Communications.RequestResource("getscriptrate", new { scriptid = scriptttttttttttttt.slug }, force_return: true);
                                     if (kkk != "null")
                                         selectedscriptrating.Text = $"Rating {kkk}";
                                     else
@@ -5816,8 +5340,8 @@ namespace Essence
                 catch (Exception ex) { MessageBox.Show(ex.ToString()); }
             });
 
-            if(position != 0)
-                obj.dndiadiadn.Text = position.ToString();            
+            if (position != 0)
+                obj.dndiadiadn.Text = position.ToString();
             else
                 obj.akdaidjaidjaiodasd.Visibility = Visibility.Collapsed;
 
@@ -5921,7 +5445,7 @@ namespace Essence
 
                 djwndnqim.Text = gamename;
             }
-            catch(Exception ex) { MessageBox.Show(ex.ToString()); }
+            catch (Exception ex) { MessageBox.Show(ex.ToString()); }
         }
 
         private int max_gozo = 0;
@@ -5949,7 +5473,7 @@ namespace Essence
 
 
 
-        private async Task<(List<ScriptObject> scripts, (int playerCount, string creatorName, string gameName, string imageUrl, string PlaceID) gameInfo)>FetchScriptsAndGameInfoAsync(int page, string query, bool skipGameInfo)
+        private async Task<(List<ScriptObject> scripts, (int playerCount, string creatorName, string gameName, string imageUrl, string PlaceID) gameInfo)> FetchScriptsAndGameInfoAsync(int page, string query, bool skipGameInfo)
         {
             return await Task.Run(async () =>
             {
@@ -6381,7 +5905,7 @@ namespace Essence
                         {
                             Task.Run(async () =>
                             {
-                                string kkk = await Communications.Get("topscriptrate");
+                                string kkk = await Communications.RequestResource("topscriptrate");
                                 List<ObjectScore> topScores = JsonConvert.DeserializeObject<List<ObjectScore>>(kkk);
                                 int ooo = 0;
                                 foreach (var item in topScores)
@@ -6407,13 +5931,13 @@ namespace Essence
                                             WP6.Visibility = Visibility.Visible;
                                             jfdiafdiasjdi.Visibility = Visibility.Visible;
                                             PopulateScripts(getScriptsTask[0], WP6, ooo);
-                                        });                                        
+                                        });
                                     }
                                     catch { MessageBox.Show(item.ObjectId); }
                                 }
                             });
                         }
-                        catch(Exception ex) { MessageBox.Show(ex.ToString()); }
+                        catch (Exception ex) { MessageBox.Show(ex.ToString()); }
                     }
 
 
@@ -6442,7 +5966,7 @@ namespace Essence
                             {
                                 lo3l.Add(scriptObject1);
                             }
-                            
+
                         }
 
                         foreach (ScriptObject scriptObject1 in lo4l)
@@ -6757,7 +6281,7 @@ namespace Essence
                 MainGrid.Children.Clear();
             }
             else
-            {                
+            {
                 CloseWriters();
 
                 if (!CloseCompleted)
@@ -6849,10 +6373,10 @@ namespace Essence
         {
             Properties.Settings.Default.Monaco = MonacoToggle.IsChecked.Value;
             if (MonacoToggle.IsChecked.Value)
-                selected_editor = 1;            
+                selected_editor = 1;
             else
                 selected_editor = 2;
-            
+
 
             MonacoToggle.IsEnabled = false;
             MonacoToggle.IsChecked = !MonacoToggle.IsChecked.Value;
@@ -6921,12 +6445,12 @@ namespace Essence
                     Console.SetOut(app.MultiTextWriterInstance);
                     Console.SetError(app.MultiTextWriterInstance);
 
-                    int width = 714; 
+                    int width = 714;
                     int height = 150;
-                    int screenX = (int)SystemParameters.PrimaryScreenWidth; 
+                    int screenX = (int)SystemParameters.PrimaryScreenWidth;
                     int screenY = (int)SystemParameters.PrimaryScreenHeight;
-                    int posX = (screenX - width) / 2; 
-                    int posY = screenY - height - 50; 
+                    int posX = (screenX - width) / 2;
+                    int posY = screenY - height - 50;
 
                     MoveWindow(consoleWindow, posX, posY, width, height, true);
 
@@ -6979,7 +6503,7 @@ namespace Essence
             await Task.Delay(100);
 
             //Move(targetControl, new Thickness(60, MainWin.ActualHeight + 150, 0, 0), new Thickness(60, 40, 0, 0), 1.1);
-            Move(targetControl, new Thickness(160,100, 100, 100), new Thickness(60, 40, 0, 0), 0.65);
+            Move(targetControl, new Thickness(160, 100, 100, 100), new Thickness(60, 40, 0, 0), 0.65);
             Fade(targetControl, 0, 1, 0.8);
             targetControl.Visibility = Visibility.Visible;
 
@@ -7030,7 +6554,7 @@ namespace Essence
         {
             e.Handled = true;
             //MessageBox.Show("Quick Panel disabled for now");
-           // return;
+            // return;
 
             AnimateGrid(ScriptsGrid, new Thickness(0, 148, 0, 0), ScriptsRadioButton);
         }
@@ -7142,7 +6666,7 @@ namespace Essence
         static string FormatTime(int secs)
         {
             int days = secs / 86400;
-            int hours = (secs % 86400) / 3600;  
+            int hours = (secs % 86400) / 3600;
             int minutes = (secs % 3600) / 60;
             int seconds = secs % 60;
 
@@ -7153,19 +6677,19 @@ namespace Essence
                 time += $"{days}D";
             }
 
-            if (hours > 0 || days > 0) 
+            if (hours > 0 || days > 0)
             {
                 if (time.Length > 0) time += ":";
                 time += $"{hours}h";
             }
 
-            if (minutes > 0 || hours > 0 || days > 0)  
+            if (minutes > 0 || hours > 0 || days > 0)
             {
                 if (time.Length > 0) time += ":";
                 time += $"{minutes}m";
             }
 
-            if (time.Length > 0) time += ":"; 
+            if (time.Length > 0) time += ":";
             time += $"{seconds}s";
 
             return time;
@@ -7291,9 +6815,9 @@ namespace Essence
 
         PerspectiveCamera camera = new PerspectiveCamera
         {
-            Position = new Point3D(0, 0, 0), 
+            Position = new Point3D(0, 0, 0),
             LookDirection = new Vector3D(0, -1, 0),
-            UpDirection = new Vector3D(0, 0, 1),       
+            UpDirection = new Vector3D(0, 0, 1),
             FieldOfView = 25
         };
 
@@ -7584,24 +7108,8 @@ namespace Essence
             Directory.CreateDirectory(api2.workspace);
             Directory.CreateDirectory(api2.workspace + "\\Essence");
 
-            
+
             logWatcher.StartWatcher();
-            logWatcher.userfound += (sender, e) =>
-            {
-                if (info.Contains(PrintValue("userId", logWatcher.useri)))
-                {
-                    if (!Communications.Roblox_IDS.Contains(PrintValue("userId", logWatcher.useri)))
-                    {
-                        if (Communications.Roblox_IDS.Length > 0)
-                            Communications.Roblox_IDS += ", ";
-
-                        Communications.Roblox_IDS += PrintValue("userId", logWatcher.useri);
-                    }
-
-                    roblox_look_finished = true;
-                    ShowBa(PrintValue("userId", logWatcher.useri));
-                }
-            };
 
             bool foundUserId = false;
             bool foundDisplayName = false;
@@ -7826,23 +7334,6 @@ namespace Essence
                                         RobloxPlayerID = PrintValue("userId", text);
                                         roblox_look_finished = true;
 
-                                        List<string> linhas = new List<string>(File.ReadAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt"));
-                                        linhas[3] = RobloxPlayerID;
-                                        File.WriteAllLines($"{localAppData}\\Essence\\userdata\\logindata.txt", linhas);
-
-                                        if (info.Contains(RobloxPlayerID))
-                                        {
-                                            if (!Communications.Roblox_IDS.Contains(RobloxPlayerID))
-                                            {
-                                                if (Communications.Roblox_IDS.Length > 0)
-                                                    Communications.Roblox_IDS += ", ";
-
-                                                Communications.Roblox_IDS += RobloxPlayerID;
-                                            }
-
-                                            ShowBa(RobloxPlayerID);
-                                        }
-
 
                                         Dispatcher.Invoke(() =>
                                         {
@@ -7925,7 +7416,7 @@ namespace Essence
                                         foundGender = true;
                                     }
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     MessageBox.Show(ex.ToString());
                                     someerror = true;
@@ -8017,7 +7508,7 @@ namespace Essence
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         MessageBox.Show(ex.ToString());
                     }
@@ -8437,7 +7928,7 @@ namespace Essence
                     string kkkk = "";
                     bool nefdnqufnq = false;
 
-                    await Communications.RequestResource("MasterMind", item, async (line) =>
+                    await Communications.RequestResource("MasterMind", item, true, async (line) =>
                     {
                         if (connecting)
                         {
@@ -8447,7 +7938,7 @@ namespace Essence
                                 await SetEditorTextAsync(AIeditor, "");
                                 qunfu23fhndu73ndn.Text = lm.Translate("AI is thinking...");
                             });
-                        }                        
+                        }
                         connecting = false;
 
                         line = line.Replace("</s>", "");
@@ -10108,7 +9599,7 @@ namespace Essence
 
                 await Task.Delay(1400);
                 areadyanimatinggrid = false;
-                AdvancedSearch(result.PlaceID, result.gameName);               
+                AdvancedSearch(result.PlaceID, result.gameName);
             }
             else
             {
@@ -10355,7 +9846,7 @@ namespace Essence
                 Settings.Default.Volume = mastervolume2;
 
                 if (isplaying_music)
-                    cafeina_pra_neve = 4;                
+                    cafeina_pra_neve = 4;
             }
         }
 
@@ -10371,7 +9862,7 @@ namespace Essence
             Move(h555555, new Thickness(5, 50, 5, 0), new Thickness(5, 50, 5, -100), 0.8);
 
 
-            while(fgfgiufifjm.IsMouseOver || h555555.IsMouseOver)
+            while (fgfgiufifjm.IsMouseOver || h555555.IsMouseOver)
             {
                 await Task.Delay(2000);
             }
@@ -10388,17 +9879,14 @@ namespace Essence
             this.IsHitTestVisible = false;
             Move(WindowBorder, WindowBorder.Margin, new Thickness(WindowBorder.ActualWidth / 2, WindowBorder.ActualHeight / 2, WindowBorder.ActualWidth / 2, WindowBorder.ActualHeight / 2), 2);
 
-            await Task.Delay(2000);
-            try { File.Delete($"{localAppData}\\Essence\\userdata\\logindata.txt"); } catch { }
-            registryKey1.SetValue("Boot", "1");
-
+            Settings.Default.Token = "null";
             RestartApp(false);
         }
 
         private int page = 3;
         private async void news_page_kkk_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if(page != 1 && page != 0)
+            if (page != 1 && page != 0)
             {
                 if (page == 2)
                 {
@@ -10490,7 +9978,7 @@ namespace Essence
             duwhnudnqwdqwium2 = true;
 
             await Task.Delay(150);
-            if(!lastplayedgrid2.IsMouseOver)
+            if (!lastplayedgrid2.IsMouseOver)
             {
                 duwhnudnqwdqwium2 = false;
                 return;
@@ -10530,7 +10018,7 @@ namespace Essence
                         return;
                     }
 
-                    scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + 35);                    
+                    scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + 35);
                 }
                 else
                 {
@@ -10555,7 +10043,7 @@ namespace Essence
         {
             await Task.Delay(300);
 
-            if (d3ndy73n23.Kind == PackIconKind.DeleteCircle) 
+            if (d3ndy73n23.Kind == PackIconKind.DeleteCircle)
             {
                 ImageBehavior.SetAnimatedSource(ExecutorBk, null);
 
@@ -10585,7 +10073,7 @@ namespace Essence
 
             bool? result = openFileDialog1.ShowDialog();
             if (result == true)
-                LoadBackg(openFileDialog1.FileName);            
+                LoadBackg(openFileDialog1.FileName);
         }
 
         private void LoadBackg(string ggs)
@@ -10666,9 +10154,8 @@ namespace Essence
             //logoutborder.IsEnabled = false;
             await Task.Delay(200);
 
-            try 
-            { 
-                File.Delete($"{localAppData}\\Essence\\userdata\\logindata.txt");
+            try
+            {
                 DoubleAnimation opacityAnimation = new DoubleAnimation();
                 opacityAnimation.From = 1.0;
                 opacityAnimation.To = 0.0;
@@ -10683,9 +10170,9 @@ namespace Essence
                 storyboard.Begin();
                 await Task.Delay(600);
                 RestartApp(false);
-            } 
+            }
             catch { }
-            
+
         }
 
         private void Border_MouseDown(object sender, MouseButtonEventArgs e)
@@ -10710,7 +10197,7 @@ namespace Essence
             if (scriptttttttttttttt.saved)
                 djbnjwbdj3.Fill = Brushes.Gold;
             else
-                djbnjwbdj3.Fill = new SolidColorBrush(Color.FromRgb(200,200,200));
+                djbnjwbdj3.Fill = new SolidColorBrush(Color.FromRgb(200, 200, 200));
 
             string direc = $"{localAppData}\\Essence\\userdata\\Saves";
 
@@ -10751,11 +10238,11 @@ namespace Essence
             dislikeshit.IsHitTestVisible = false;
 
             ScriptObject kk = scriptttttttttttttt;
-            await Communications.Get("scriptrate", $"{kk.slug}\n | \nPositive", force_return: true);
-            rattinggg[kk.slug] = 2;
             selectedscriptrating.Text = "Rating: Loading...";
+            string kkk = await Communications.RequestResource("ratescript", new { scriptid = kk.slug, rate = "Positive" }, force_return: true);
+            rattinggg[kk.slug] = 2;
 
-            string kkk = await Communications.Get("scriptrating", kk.slug, force_return: true);
+            
             await Dispatcher.InvokeAsync(() =>
             {
                 try
@@ -10766,7 +10253,7 @@ namespace Essence
                         selectedscriptrating.Text = "Rating: No rates yet here";
                 }
                 catch { }
-            });          
+            });
 
 
             likeeefef.IsHitTestVisible = true;
@@ -10781,11 +10268,11 @@ namespace Essence
             dislikeshit.IsHitTestVisible = false;
 
             ScriptObject kk = scriptttttttttttttt;
-            await Communications.Get("scriptrate", $"{kk.slug}\n | \nNegative", force_return: true);
-            rattinggg[kk.slug] = 1;
             selectedscriptrating.Text = "Rating: Loading...";
+            string kkk = await Communications.RequestResource("ratescript", new { scriptid = kk.slug, rate = "Negative" }, force_return: true);
+            rattinggg[kk.slug] = 1;
 
-            string kkk = await Communications.Get("scriptrating", kk.slug, force_return: true);
+
             await Dispatcher.InvokeAsync(() =>
             {
                 try
@@ -10860,7 +10347,7 @@ namespace Essence
 
 
         private async void lasaslk(Border ggs, string eggg)
-        {            
+        {
             var contractAnimation = new DoubleAnimation
             {
                 From = 300, // altura original
@@ -11138,7 +10625,7 @@ namespace Essence
                     //OnGameLeave?.Invoke(this, EventArgs.Empty);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Error opening roblox log file: " + ex.ToString());
             }
@@ -11186,7 +10673,7 @@ namespace Essence
                 //Console.WriteLine("User found event: " + useri);
                 userfound?.Invoke(this, EventArgs.Empty);
             }
-            else if(entry.Contains("The user is moderated with type: ") && !user_b)
+            else if (entry.Contains("The user is moderated with type: ") && !user_b)
             {
                 user_b = true;
                 MessageBox.Show(useri + " Banned");

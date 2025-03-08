@@ -1,13 +1,14 @@
-﻿<Application x:Class="Essence.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Essence">
+﻿<Application
+    x:Class="Essence.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Essence">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.CheckBox.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ProgressBar.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ProgressBar.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Slider.xaml" />
@@ -15,7 +16,10 @@
 
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />
                 <ResourceDictionary>
-                    <Style x:Key="MaterialDesignToggleButtonStyle" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignSwitchToggleButton}">
+                    <Style
+                        x:Key="MaterialDesignToggleButtonStyle"
+                        BasedOn="{StaticResource MaterialDesignSwitchToggleButton}"
+                        TargetType="{x:Type ToggleButton}">
                         <Style.Resources>
                             <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />
                         </Style.Resources>
@@ -31,23 +35,44 @@
 
                     </ResourceDictionary.MergedDictionaries>
 
-                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Light" Color="#FFA58999"/>
-                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Light.Foreground" Color="{StaticResource Primary200Foreground}"/>
-                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary" Color="#FFC81414"/>
-                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Foreground" Color="{StaticResource Primary500Foreground}"/>
-                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Dark" Color="#FFC81414"/>
-                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Dark.Foreground" Color="{StaticResource Primary700Foreground}"/>
+                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Light" Color="#FFA58999" />
+                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Light.Foreground" Color="{StaticResource Primary200Foreground}" />
+                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary" Color="#FFC81414" />
+                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Foreground" Color="{StaticResource Primary500Foreground}" />
+                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Dark" Color="#FFC81414" />
+                    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Dark.Foreground" Color="{StaticResource Primary700Foreground}" />
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
 
-            <Style x:Key="{x:Type CheckBox}" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}" />
-            <Style x:Key="{x:Type ProgressBar}" TargetType="{x:Type ProgressBar}" BasedOn="{StaticResource MaterialDesignLinearProgressBar}" />
-            <Style x:Key="{x:Type Button}" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignRaisedButton}" />
-            <Style x:Key="{x:Type TextBox}" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}" />
-            <Style x:Key="{x:Type Slider}" TargetType="{x:Type Slider}" BasedOn="{StaticResource MaterialDesign3.MaterialDesignSlider}" />
-            <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}" />
+            <Style
+                x:Key="{x:Type CheckBox}"
+                BasedOn="{StaticResource MaterialDesignCheckBox}"
+                TargetType="{x:Type CheckBox}" />
+            <Style
+                x:Key="{x:Type ProgressBar}"
+                BasedOn="{StaticResource MaterialDesignLinearProgressBar}"
+                TargetType="{x:Type ProgressBar}" />
+            <Style
+                x:Key="{x:Type Button}"
+                BasedOn="{StaticResource MaterialDesignRaisedButton}"
+                TargetType="{x:Type Button}" />
+            <Style
+                x:Key="{x:Type TextBox}"
+                BasedOn="{StaticResource MaterialDesignTextBox}"
+                TargetType="{x:Type TextBox}" />
+            <Style
+                x:Key="{x:Type Slider}"
+                BasedOn="{StaticResource MaterialDesign3.MaterialDesignSlider}"
+                TargetType="{x:Type Slider}" />
+            <Style
+                x:Key="{x:Type ComboBox}"
+                BasedOn="{StaticResource MaterialDesignComboBox}"
+                TargetType="{x:Type ComboBox}" />
 
-            <Style x:Key="{x:Type ToggleButton}" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource MaterialDesignSwitchToggleButton}">
+            <Style
+                x:Key="{x:Type ToggleButton}"
+                BasedOn="{StaticResource MaterialDesignSwitchToggleButton}"
+                TargetType="{x:Type ToggleButton}">
                 <Style.Resources>
                     <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.ToggleButton.xaml" />
                 </Style.Resources>
@@ -55,28 +80,45 @@
 
             <Style x:Key="{x:Type ToolTip}" TargetType="ToolTip">
                 <Setter Property="OverridesDefaultStyle" Value="true" />
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="FontFamily" Value="/Essence;component/Fonts/#Poppins Semibold"/>
-                <Setter Property="Storyboard.Duration" Value="0:0:0.4"/>
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="FontFamily" Value="/Essence;component/Fonts/#Poppins Semibold" />
+                <Setter Property="Storyboard.Duration" Value="0:0:0.4" />
                 <Setter Property="Placement" Value="Right" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ToolTip">
                             <Grid>
-                                <Path Data="M3.5 0L6.53109 5.25H0.468911L3.5 0Z" Fill="#FF24293E"  Width="10" Height="10" Stroke="#FF24293E" Margin="-65,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                <Path
+                                    Width="10"
+                                    Height="10"
+                                    Margin="-65,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Data="M3.5 0L6.53109 5.25H0.468911L3.5 0Z"
+                                    Fill="#FF24293E"
+                                    Stroke="#FF24293E">
                                     <Path.LayoutTransform>
                                         <RotateTransform Angle="-90" />
                                     </Path.LayoutTransform>
                                 </Path>
-                                <Border Name="Border" BorderThickness="1" CornerRadius="5" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}"  Background="#8024293E" BorderBrush="#FF24293E" Margin="13,5,0,0" VerticalAlignment="Center">
-                                    <ContentPresenter Margin="4" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                <Border
+                                    Name="Border"
+                                    Width="{TemplateBinding Width}"
+                                    Height="{TemplateBinding Height}"
+                                    Margin="13,5,0,0"
+                                    VerticalAlignment="Center"
+                                    Background="#8024293E"
+                                    BorderBrush="#FF24293E"
+                                    BorderThickness="1"
+                                    CornerRadius="5">
+                                    <ContentPresenter
+                                        Margin="4"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top" />
                                 </Border>
                             </Grid>
 
-                            <ControlTemplate.Triggers>
-
-
-                            </ControlTemplate.Triggers>
+                            <ControlTemplate.Triggers />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -84,42 +126,53 @@
 
             <FontFamily x:Key="PoppinsLight">/Essence;component/Fonts/##Poppins Light</FontFamily>
 
-            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Stroke" Color="#FF818181"/>
-            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Fill" Color="#FFFFFFFF"/>
-            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Stroke" Color="#FF27C7F7"/>
-            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Fill" Color="#FFCCEEFB"/>
-            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Checked.Stroke" Color="#FF262626"/>
-            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Checked.Fill" Color="#FF595959"/>
-            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Checked.Stroke" Color="#FF1CC4F7"/>
-            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Checked.Fill" Color="#FF82DFFB"/>
-            <PathGeometry x:Key="TreeArrow" Figures="M5.54168 2.625L3.50001 4.66667L1.49585 2.625"/>
+            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Stroke" Color="#FF818181" />
+            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Fill" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Stroke" Color="#FF27C7F7" />
+            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Fill" Color="#FFCCEEFB" />
+            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Checked.Stroke" Color="#FF262626" />
+            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.Static.Checked.Fill" Color="#FF595959" />
+            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Checked.Stroke" Color="#FF1CC4F7" />
+            <SolidColorBrush x:Key="TreeViewItem.TreeArrow.MouseOver.Checked.Fill" Color="#FF82DFFB" />
+            <PathGeometry x:Key="TreeArrow" Figures="M5.54168 2.625L3.50001 4.66667L1.49585 2.625" />
             <Style x:Key="ExpandCollapseToggleStyle" TargetType="{x:Type ToggleButton}">
-                <Setter Property="Focusable" Value="False"/>
-                <Setter Property="Width" Value="16"/>
-                <Setter Property="Height" Value="16"/>
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Width" Value="16" />
+                <Setter Property="Height" Value="16" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ToggleButton}">
-                            <Border Background="Transparent" Height="16" Padding="5,5,5,5" Width="16">
-                                <Path x:Name="ExpandPath" Data="{StaticResource TreeArrow}"  Stroke="White" Margin="-1,1,0,1" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border
+                                Width="16"
+                                Height="16"
+                                Padding="5,5,5,5"
+                                Background="Transparent">
+                                <Path
+                                    x:Name="ExpandPath"
+                                    Margin="-1,1,0,1"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Data="{StaticResource TreeArrow}"
+                                    Stretch="Fill"
+                                    Stroke="White">
                                     <Path.RenderTransform>
-                                        <RotateTransform Angle="-0" CenterY="0" CenterX="0"/>
+                                        <RotateTransform Angle="-0" CenterX="0" CenterY="0" />
                                     </Path.RenderTransform>
                                 </Path>
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="RenderTransform" TargetName="ExpandPath">
+                                    <Setter TargetName="ExpandPath" Property="RenderTransform">
                                         <Setter.Value>
-                                            <RotateTransform Angle="0" CenterY="3" CenterX="3"/>
+                                            <RotateTransform Angle="0" CenterX="3" CenterY="3" />
                                         </Setter.Value>
                                     </Setter>
 
                                 </Trigger>
                                 <Trigger Property="IsChecked" Value="False">
-                                    <Setter Property="RenderTransform" TargetName="ExpandPath">
+                                    <Setter TargetName="ExpandPath" Property="RenderTransform">
                                         <Setter.Value>
-                                            <RotateTransform Angle="-90" CenterY="3" CenterX="3"/>
+                                            <RotateTransform Angle="-90" CenterX="3" CenterY="3" />
                                         </Setter.Value>
                                     </Setter>
 
@@ -135,7 +188,7 @@
                 <Setter Property="Control.Template">
                     <Setter.Value>
                         <ControlTemplate>
-                            <Rectangle/>
+                            <Rectangle />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -273,8 +326,14 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type RepeatButton}">
-                            <Border x:Name="Border" Margin="0" BorderThickness="0" >
-                                <Path HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding Content, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                            <Border
+                                x:Name="Border"
+                                Margin="0"
+                                BorderThickness="0">
+                                <Path
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Data="{Binding Content, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsPressed" Value="True">
@@ -310,7 +369,13 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Thumb}">
-                            <Border CornerRadius="3" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0" Width="8" Margin="8,0,-2,0" />
+                            <Border
+                                Width="8"
+                                Margin="8,0,-2,0"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="0"
+                                CornerRadius="3" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -320,7 +385,12 @@
                 <Setter Property="Control.Template">
                     <Setter.Value>
                         <ControlTemplate>
-                            <Rectangle Margin="2" SnapsToDevicePixels="True" Stroke="{StaticResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2" />
+                            <Rectangle
+                                Margin="2"
+                                SnapsToDevicePixels="True"
+                                Stroke="{StaticResource {x:Static SystemColors.ControlTextBrushKey}}"
+                                StrokeDashArray="1 2"
+                                StrokeThickness="1" />
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -334,19 +404,37 @@
                         <RowDefinition MaxHeight="0" />
                     </Grid.RowDefinitions>
                     <Border Grid.RowSpan="3" Background="#00FFFFFF" />
-                    <RepeatButton Grid.Row="0" Height="18" Command="ScrollBar.LineUpCommand" Content="M 0 4 L 8 4 L 4 0 Z" Style="{StaticResource ScrollBarLineButton}" Background="{x:Null}" />
-                    <Track x:Name="PART_Track" Grid.Row="1" IsDirectionReversed="True">
+                    <RepeatButton
+                        Grid.Row="0"
+                        Height="18"
+                        Background="{x:Null}"
+                        Command="ScrollBar.LineUpCommand"
+                        Content="M 0 4 L 8 4 L 4 0 Z"
+                        Style="{StaticResource ScrollBarLineButton}" />
+                    <Track
+                        x:Name="PART_Track"
+                        Grid.Row="1"
+                        IsDirectionReversed="True">
                         <Track.DecreaseRepeatButton>
                             <RepeatButton Command="ScrollBar.PageUpCommand" Style="{StaticResource ScrollBarPageButton}" />
                         </Track.DecreaseRepeatButton>
                         <Track.Thumb>
-                            <Thumb Margin="0.5,0,0.5,0" Background="#90B6B6B6" BorderBrush="#B6B6B6" Style="{StaticResource ScrollBarThumb}" />
+                            <Thumb
+                                Margin="0.5,0,0.5,0"
+                                Background="#90B6B6B6"
+                                BorderBrush="#B6B6B6"
+                                Style="{StaticResource ScrollBarThumb}" />
                         </Track.Thumb>
                         <Track.IncreaseRepeatButton>
                             <RepeatButton Command="ScrollBar.PageDownCommand" Style="{StaticResource ScrollBarPageButton}" />
                         </Track.IncreaseRepeatButton>
                     </Track>
-                    <RepeatButton Grid.Row="3" Height="18" Command="ScrollBar.LineDownCommand" Content="M 0 0 L 4 4 L 8 0 Z" Style="{StaticResource ScrollBarLineButton}" />
+                    <RepeatButton
+                        Grid.Row="3"
+                        Height="18"
+                        Command="ScrollBar.LineDownCommand"
+                        Content="M 0 0 L 4 4 L 8 0 Z"
+                        Style="{StaticResource ScrollBarLineButton}" />
                 </Grid>
             </ControlTemplate>
             <ControlTemplate x:Key="HorizontalScrollBar" TargetType="{x:Type ScrollBar}">
@@ -357,19 +445,36 @@
                         <ColumnDefinition MaxWidth="18" />
                     </Grid.ColumnDefinitions>
                     <Border Grid.ColumnSpan="3" Background="#00FFFFFF" />
-                    <RepeatButton Grid.Column="0" Width="18" Command="ScrollBar.LineLeftCommand" Content="M 4 0 L 4 8 L 0 4 Z" Style="{StaticResource ScrollBarLineButton}" />
-                    <Track x:Name="PART_Track" Grid.Column="1" IsDirectionReversed="False">
+                    <RepeatButton
+                        Grid.Column="0"
+                        Width="18"
+                        Command="ScrollBar.LineLeftCommand"
+                        Content="M 4 0 L 4 8 L 0 4 Z"
+                        Style="{StaticResource ScrollBarLineButton}" />
+                    <Track
+                        x:Name="PART_Track"
+                        Grid.Column="1"
+                        IsDirectionReversed="False">
                         <Track.DecreaseRepeatButton>
                             <RepeatButton Command="ScrollBar.PageLeftCommand" Style="{StaticResource ScrollBarPageButton}" />
                         </Track.DecreaseRepeatButton>
                         <Track.Thumb>
-                            <Thumb Margin="1,0,1,0" Background="#B2B6B6B6" BorderBrush="#B2B6B6B6" Style="{StaticResource ScrollBarThumb}" />
+                            <Thumb
+                                Margin="1,0,1,0"
+                                Background="#B2B6B6B6"
+                                BorderBrush="#B2B6B6B6"
+                                Style="{StaticResource ScrollBarThumb}" />
                         </Track.Thumb>
                         <Track.IncreaseRepeatButton>
                             <RepeatButton Command="ScrollBar.PageRightCommand" Style="{StaticResource ScrollBarPageButton}" />
                         </Track.IncreaseRepeatButton>
                     </Track>
-                    <RepeatButton Grid.Column="2" Width="18" Command="ScrollBar.LineRightCommand" Content="M 0 0 L 4 4 L 0 8 Z" Style="{StaticResource ScrollBarLineButton}" />
+                    <RepeatButton
+                        Grid.Column="2"
+                        Width="18"
+                        Command="ScrollBar.LineRightCommand"
+                        Content="M 0 0 L 4 4 L 0 8 Z"
+                        Style="{StaticResource ScrollBarLineButton}" />
                 </Grid>
             </ControlTemplate>
 
@@ -398,12 +503,23 @@
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="HorizontalContentAlignment" Value="Center" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
-                <Setter Property="Padding" Value="6 1" />
+                <Setter Property="Padding" Value="6,1" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Button}">
-                            <Border x:Name="border" Background="#00FFFFFF" SnapsToDevicePixels="True" CornerRadius="1">
-                                <ContentPresenter x:Name="ContentPres" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            <Border
+                                x:Name="border"
+                                Background="#00FFFFFF"
+                                CornerRadius="1"
+                                SnapsToDevicePixels="True">
+                                <ContentPresenter
+                                    x:Name="ContentPres"
+                                    Margin="{TemplateBinding Padding}"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    Focusable="False"
+                                    RecognizesAccessKey="True"
+                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">

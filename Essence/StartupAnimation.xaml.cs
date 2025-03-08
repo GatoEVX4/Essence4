@@ -68,34 +68,6 @@ namespace Essence
             Inicializar();
         }
 
-        private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            try
-            {
-
-                if (WindowState == WindowState.Maximized)
-                {
-                    WindowState = WindowState.Normal;
-
-                    Width = 740;
-                    Height = 457;
-
-                    Point mousePosition = Mouse.GetPosition(System.Windows.Application.Current.MainWindow);
-                    Point mousePositionOnScreen = System.Windows.Application.Current.MainWindow.PointToScreen(mousePosition);
-
-                    double newLeft = mousePositionOnScreen.X - this.Left - (Width / 2);
-                    double newTop = mousePositionOnScreen.Y - this.Top - 40;
-                    this.Top = newTop;
-                    this.Left = newLeft;
-                }
-
-                DragMove();
-
-            }
-            catch { }
-        }
-
-
         private async void ee_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             await Dispatcher.InvokeAsync(() =>
