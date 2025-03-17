@@ -1,56 +1,44 @@
 import os
+import threading
+import time
 
-def obter_tamanho_arquivos(diretorio_raiz):
-    print("Calculando tempo necessário...")
-    arquivos_tamanho = []
-    for subdir, _, arquivos in os.walk(diretorio_raiz):
-        for arquivo in arquivos:
-            caminho_arquivo = os.path.join(subdir, arquivo)
-            try:
-                tamanho = os.path.getsize(caminho_arquivo)
-                arquivos_tamanho.append((caminho_arquivo, tamanho))
-            except (OSError, PermissionError):
-                # Ignora arquivos que não podem ser acessados
-                pass
-    print("OK...")
-    return sorted(arquivos_tamanho, key=lambda x: x[1])
+# Função para renomear os arquivos
+def rename_files_in_directory(directory):
+    # Obter a lista completa de arquivos para contar o total
+    total_files = sum([len(files) for _, _, files in os.walk(directory)])
+    
+    # Função para exibir o progresso em uma thread separada
+    def display_progress():
+        nonlocal files_checked
+        while files_checked < total_files:
+            if total_files > 0:
+                progress = (files_checked / total_files) * 100
+                print(f"\rProgresso: {progress:.2f}% - Arquivos verificados: {files_checked}/{total_files}", end="")
+            time.sleep(0.5)
+    
+    # Variável compartilhada para contar os arquivos verificados
+    files_checked = 0
+    
+    # Inicia a thread do progresso
+    progress_thread = threading.Thread(target=display_progress)
+    progress_thread.start()
 
-def buscar_e_substituir_string_em_arquivos(diretorio_raiz, string_procurada, string_substituta):
-    arquivos_encontrados = []
-    arquivos_tamanho = obter_tamanho_arquivos(diretorio_raiz)
-    total_arquivos = len(arquivos_tamanho)
+    # Percorre todos os diretórios e arquivos
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if "Essence2" in file:
+                old_file_path = os.path.join(root, file)
+                new_file_name = file.replace("Essence2", "Essence")
+                new_file_path = os.path.join(root, new_file_name)
+                os.rename(old_file_path, new_file_path)
+            
+            # Atualiza o contador de arquivos verificados
+            files_checked += 1
+    
+    # Aguarda a thread do progresso terminar
+    progress_thread.join()
+    print("\nOperação concluída.")
 
-    for i, (caminho_arquivo, _) in enumerate(arquivos_tamanho):
-        try:
-            with open(caminho_arquivo, 'r', encoding='utf-8') as f:
-                conteudo = f.read()
-                if string_procurada in conteudo:
-                    conteudo_modificado = conteudo.replace(string_procurada, string_substituta)
-                    with open(caminho_arquivo, 'w', encoding='utf-8') as f_modificado:
-                        f_modificado.write(conteudo_modificado)
-                    arquivos_encontrados.append(caminho_arquivo)
-                    print(f"String encontrada e substituída no arquivo: {caminho_arquivo}")
-                    print("------------------------------------------------------------------------")
-        except (UnicodeDecodeError, PermissionError):
-            # Ignora arquivos que não podem ser lidos
-            pass
-
-        progresso = (i + 1) / total_arquivos * 100
-        print(f"Progresso: {progresso:.2f}%")
-
-    return arquivos_encontrados
-
-# Exemplo de uso
-diretorio_raiz = './'  # Substitua pelo diretório desejado
-string_procurada = input("String a procurar: ")  # Substitua pela string que deseja procurar
-string_substituta = "EssenceUpdater"  # String que substituirá a string procurada
-
-resultados = buscar_e_substituir_string_em_arquivos(diretorio_raiz, string_procurada, string_substituta)
-
-if resultados:
-    print("A string foi encontrada e substituída nos seguintes arquivos:")
-    for resultado in resultados:
-        print(resultado)
-else:
-    print("A string não foi encontrada em nenhum arquivo.")
-input()
+# Caminho para o diretório a ser processado
+diretorio = "C:\\Users\\PC\\Desktop\\Essence"
+rename_files_in_directory(diretorio)

@@ -331,24 +331,6 @@ namespace Essence.Translations {
         }
         
         /// <summary>
-        ///   Consulta uma cadeia de caracteres localizada semelhante a Personalização do Essence.
-        /// </summary>
-        internal static string Essence_Customization {
-            get {
-                return ResourceManager.GetString("Essence Customization", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Consulta uma cadeia de caracteres localizada semelhante a Registro de Alterações das Funcionalidades do Essence.
-        /// </summary>
-        internal static string Essence_Features_Changelog {
-            get {
-                return ResourceManager.GetString("Essence Features Changelog", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Consulta uma cadeia de caracteres localizada semelhante a Email.
         /// </summary>
         internal static string Email {
@@ -372,6 +354,24 @@ namespace Essence.Translations {
         internal static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Personalização do Essence.
+        /// </summary>
+        internal static string Essence_Customization {
+            get {
+                return ResourceManager.GetString("Essence Customization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Registro de Alterações das Funcionalidades do Essence.
+        /// </summary>
+        internal static string Essence_Features_Changelog {
+            get {
+                return ResourceManager.GetString("Essence Features Changelog", resourceCulture);
             }
         }
         

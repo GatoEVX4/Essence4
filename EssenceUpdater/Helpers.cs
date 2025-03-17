@@ -10,11 +10,15 @@ using System.Windows.Controls;
 using System.Windows;
 using System.IO.Compression;
 using static System.Net.Mime.MediaTypeNames;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace EssenceUpdater
 {
     class Helpers
     {
+        [DllImport("Auth.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int InitAuth();
 
         internal static async Task ExtractAll(string pastaOrigem, Action<string> nigga = null, Action<double> progress = null)
         {
@@ -125,17 +129,26 @@ namespace EssenceUpdater
         }
 
 
-        internal static async Task<bool> DownloadFile(string url, string destinationPath, Action<double> nigga = null)
+
+        [DllImport("Auth.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr GenDownloadRA();
+        internal static async Task<bool> DownloadFile(string url, string destinationPath, Action<double> nigga = null, bool auth = true)
         {
             InstallWindow.dwn = true;
             string directoryPath = Path.GetDirectoryName(destinationPath);
             if (!Directory.Exists(directoryPath))
-                Directory.CreateDirectory(directoryPath);
-            
+                Directory.CreateDirectory(directoryPath);            
 
             using (HttpClient client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("authenticity", a_r());
+                if (auth)
+                {
+                    await Task.Run(() =>
+                    {
+                        client.DefaultRequestHeaders.Add("authenticity", Marshal.PtrToStringAnsi(GenDownloadRA()));
+                    });
+                }
+               
                 client.Timeout = TimeSpan.FromSeconds(10);
 
                 HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
@@ -206,15 +219,15 @@ namespace EssenceUpdater
             }
         }
 
-        internal static string CalculateMD5(string filePath)
+        internal static string CalculateSHA256(string filePath)
         {
             try
             {
                 using (FileStream file = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    using (MD5 md5 = MD5.Create())
+                    using (SHA256 sha256 = SHA256.Create())
                     {
-                        byte[] hash = md5.ComputeHash(file);
+                        byte[] hash = sha256.ComputeHash(file);
                         return BitConverter.ToString(hash).Replace("-", "").ToUpper();
                     }
                 }
@@ -222,55 +235,6 @@ namespace EssenceUpdater
             catch
             {
                 return "e";
-            }
-        }
-
-
-
-        private static readonly string K1 = D(new int[] { 102, 123, 123, 61, 120, 96, 115, 109, 51, 51, 36, 51, 98, 125, 113, 115, 63, 62, 119, 100, 96, 84, 49, 119, 111, 63, 127, 125, 56, 108, 98, 109 });
-
-        private static readonly string H_S1 = D(new int[] { 120, 110, 110, 111, 99, 119, 98, 110, 49, 100, 58, 125, 106, 58, 58, 111, 57, 60, 63, 102, 100, 104, 126, 106, 111, 108, 57, 102, 62, 62, 100, 96 });
-
-        private static readonly string H_S2 = D(new int[] { 120, 113, 125, 60, 96, 122, 125, 111, 127, 119, 100, 99, 100, 61, 102, 110, 120, 104, 126, 109, 49, 120, 51, 103, 62, 84, 100, 108, 99, 125, 115, 103 });
-
-        private static string D(int[] x)
-        {
-            return new string(Enumerable.Reverse(x).Select(v => (char)((v ^ 0xA) + (3 * (v % 2 == 0 ? 1 : -1)))).ToArray());
-        }
-        static string Gen()
-        {
-            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-            var random = new Random();
-            var result = new StringBuilder(30);
-
-            for (int i = 0; i < 30; i++)
-            {
-                result.Append(chars[random.Next(chars.Length)]);
-            }
-
-            string chave = $"{K1}-{result}";
-
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(chave));
-                StringBuilder builder = new StringBuilder();
-
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-
-                return builder.ToString() + ":" + result.ToString();
-            }
-        }
-
-        internal static string a_r(string data = "Essence")
-        {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                string lol = Gen();
-                string request_hash = BitConverter.ToString(sha256.ComputeHash(Encoding.UTF8.GetBytes($"{H_S1}:{lol}:{data}:{H_S2}"))).Replace("-", "").ToLower();
-                return $"{lol}|{request_hash}";
             }
         }
     }

@@ -1,11 +1,14 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Configuration;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -15,7 +18,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace Essence.Elements
@@ -89,17 +91,122 @@ namespace Essence.Elements
         }
 
 
-
-
-
-        private void UserManagementBorder_Loaded(object sender, RoutedEventArgs e)
+        int tries = 0;
+        private async Task<string> httpreq(string endpoint)
         {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    //client.DefaultRequestHeaders.Add("authenticity", Helpers.a_r());
+                    client.Timeout = TimeSpan.FromSeconds(5);
+
+                    HttpResponseMessage response = await client.GetAsync("https://essenceapi.discloud.app/" + endpoint);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return await response.Content.ReadAsStringAsync();
+                    }
+                    else
+                    {
+                        if (tries < 3)
+                        {
+                            tries++;
+                            return await httpreq(endpoint);
+                        }
+                        else
+                        {
+                            return "e";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return "e";
+            }
+        }
+
+        private static readonly string EssenceFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Essence");
+
+        private string adlink;
+        private MediaElement? mediaPlayer = null;
+        private async void UserManagementBorder_Loaded(object sender, RoutedEventArgs e)
+        {
+            ADVgrid.Visibility = Visibility.Collapsed;
+            ADVgrid.Opacity = 0;
             EnableBlur();
+            return;
+            try
+            {
+                string image = "";
+                JObject jsonObj = JObject.Parse(await httpreq("externals/ads"));
+                image = jsonObj["executor"]?["image"].ToString() ?? "https://www.pixground.com/colorful-abstract-background-moving-waves-4k-wallpaper/?download-img=4k";
+                adlink = jsonObj["executor"]?["link"].ToString() ?? "discordinvite";
+
+                if (await Communications.DownloadFile(image, Path.Combine(EssenceFolder, "advertisement2.mp4"), auth: false))
+                {
+                    mediaPlayer = new MediaElement
+                    {
+                        Source = new Uri(Path.Combine(EssenceFolder, "advertisement2.mp4"), UriKind.RelativeOrAbsolute),
+                        LoadedBehavior = MediaState.Manual,
+                        UnloadedBehavior = MediaState.Manual,
+                        Volume = 0.2,
+                        Position = TimeSpan.Zero,
+                        StretchDirection = StretchDirection.Both,
+                        Stretch = Stretch.Uniform
+                    };
+
+                    mediaPlayer.MediaEnded += (e2, sender2) =>
+                    {
+                        mediaPlayer.Stop();
+                        ADimage.Child = null;
+                        mediaPlayer = null;
+
+                        mediaPlayer = new MediaElement
+                        {
+                            Source = new Uri(Path.Combine(EssenceFolder, "advertisement2.mp4"), UriKind.RelativeOrAbsolute),
+                            LoadedBehavior = MediaState.Manual,
+                            UnloadedBehavior = MediaState.Manual,
+                            Volume = 0,
+                            Position = TimeSpan.Zero,
+                            StretchDirection = StretchDirection.Both,
+                            Stretch = Stretch.Uniform
+                        };
+                        ADimage.Child = mediaPlayer;
+                        mediaPlayer.Play();
+                    };
+
+                    mediaPlayer.Clip = new RectangleGeometry(new Rect(0, 0, ADimage.ActualWidth, ADimage.ActualHeight), 5, 5);
+                    mediaPlayer.SizeChanged += (s, e) =>
+                    {
+                        mediaPlayer.Clip = new RectangleGeometry(new Rect(0, 0, ADimage.ActualWidth, ADimage.ActualHeight), 5, 5);
+                    };
+
+                    ADVgrid.Visibility = Visibility.Visible;
+                    ADimage.Child = mediaPlayer;
+                    mediaPlayer.Play();
+                    Fade(ADVgrid, 0, 1, 1);
+                    Move(ADVgrid, new Thickness(0, 400, 50, 25), new Thickness(0, 225, 50, 25), 0.4);
+                }
+            }
+            catch
+            {
+
+            }
         }
 
         public ProfileSettings()
         {
             InitializeComponent();
+
+            DispatcherTimer e2 = new DispatcherTimer();
+            e2.Interval = TimeSpan.FromSeconds(0.5);
+            e2.Tick += (sender, e) => {
+                profilehour1.Text = DateTime.Now.ToString("HH");
+                profilehour2.Text = DateTime.Now.ToString("mm");
+            };
+            e2.Start();
         }
 
         public static void Fade(DependencyObject ElementName, double Start, double End, double Time)
@@ -179,9 +286,9 @@ namespace Essence.Elements
 
         private async void devicesmanagementborder_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            devicesmanagementborder.Background = new SolidColorBrush(Color.FromRgb(40, 40, 40));
-            keymanagementborder.Background = new SolidColorBrush(Color.FromRgb(20, 20, 20));
-            accmanagementborder.Background = new SolidColorBrush(Color.FromRgb(20, 20, 20));
+            devicesmanagementborder.Background = new SolidColorBrush(Color.FromArgb(80, 40, 40, 40));
+            keymanagementborder.Background = new SolidColorBrush(Color.FromArgb(80, 20, 20, 20));
+            accmanagementborder.Background = new SolidColorBrush(Color.FromArgb(80, 20, 20, 20));
 
             Fade(accmanagementviwer, 1, 0, 0.3);
             Fade(keymanagementviwer, 1, 0, 0.3);
@@ -198,21 +305,27 @@ namespace Essence.Elements
 
         private async void UserManagementIcon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            Move(UserManagementBorder, new Thickness(0, 25, 0, 25), new Thickness(0, 100, 0, 25), 0.4);
+            Move(UserManagementBorder, new Thickness(50, 25, 0, 25), new Thickness(-150, 25, 0, 25), 0.4);
             Fade(UserManagementGrid, 1, 0, 0.4);
 
             DisableBlur();
 
             await Task.Delay(500);
             UserManagementGrid.Visibility = Visibility.Collapsed;
-            Hide();
             App.window.executor.IsHitTestVisible = true;
+            this.IsHitTestVisible = false;
+            Hide();
         }
         
 
         private void copykeysupportserver_Click(object sender, RoutedEventArgs e)
         {
             Clipboard.SetText(sellerservertxt.Text);
+        }
+
+        private void ADB_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -5,13 +5,11 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-
+#nullable disable
 namespace Essence.Elements
 {
     public partial class ScriptThingy : UserControl
     {
-        private static readonly HttpClient client = new HttpClient();
-
         public bool Salvo = false;
         public string ImageURL = "";
 

@@ -91,6 +91,8 @@ namespace EssenceUpdater
                 string logFilePath = "error_log.txt"; // Caminho do arquivo de log
                 string errorMessage = $"[{DateTime.Now}] - {ex.GetType()} - {ex.Message}\n{ex.StackTrace}\n\n";
                 File.AppendAllText(logFilePath, errorMessage);
+
+                Console.WriteLine(errorMessage);
             }
             catch (Exception logEx)
             {

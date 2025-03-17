@@ -20,7 +20,7 @@
     Background="{x:Null}"
     Closing="MainWin_Closing"
     Foreground="#FF939292"
-    Icon="/essence.ico"
+    Icon="/Graphics/Images/essence.ico"
     Loaded="MainWin_Loaded"
     SizeChanged="MainWin_SizeChanged"
     StateChanged="MainWin_StateChanged"
@@ -401,7 +401,7 @@
                                         VerticalAlignment="Center"
                                         RenderOptions.BitmapScalingMode="HighQuality"
                                         RenderOptions.EdgeMode="Aliased"
-                                        Source="/ImageResources/MainExecution/mdi--language-lua.png"
+                                        Source="/Graphics/Images/MainExecution/mdi--language-lua.png"
                                         Visibility="Collapsed" />
                                     <TextBox
                                         x:Name="titletxt"
@@ -780,7 +780,7 @@
                         d:IsHidden="True"
                         local:CreationLogger.EnableLogging="True"
                         Visibility="Hidden" />
-                    <Grid x:Name="HomeGrid" Margin="60,40,0,0">
+                    <Grid x:Name="HomeGrid" Margin="60,40,0,0" d:IsHidden="True">
 
                         <Grid Margin="0,0,0,48">
                             <Grid.ColumnDefinitions>
@@ -935,7 +935,7 @@
                                                         Height="40"
                                                         RenderOptions.BitmapScalingMode="HighQuality"
                                                         RenderOptions.EdgeMode="Aliased"
-                                                        Source="/ImageResources/Settings/Roblox6.png"
+                                                        Source="/Graphics/Images/Settings/Roblox6.png"
                                                         Stretch="UniformToFill" />
                                                 </Border>
 
@@ -1378,7 +1378,7 @@
                                         RenderOptions.EdgeMode="Aliased"
                                         Stretch="UniformToFill">
                                         <Image.Source>
-                                            <FormatConvertedBitmap DestinationFormat="Gray8" Source="/ImageResources/Backgrounds/background.png" />
+                                            <FormatConvertedBitmap DestinationFormat="Gray8" Source="/Graphics/Images/Backgrounds/background.png" />
                                         </Image.Source>
                                     </Image>
                                 </Border>
@@ -1575,28 +1575,6 @@
                                             Foreground="#FF646464"
                                             Text="15/01/2025 | Event" />
 
-                                        <Border
-                                            Width="60"
-                                            Height="60"
-                                            Margin="10,20,10,0"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Top"
-                                            Background="#4CC81414"
-                                            CornerRadius="8"
-                                            Visibility="Collapsed">
-                                            <Border.Effect>
-                                                <DropShadowEffect
-                                                    BlurRadius="25"
-                                                    Direction="0"
-                                                    ShadowDepth="0"
-                                                    Color="Red" />
-                                            </Border.Effect>
-                                            <Image
-                                                Margin="10,10,10,10"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                RenderOptions.EdgeMode="Aliased"
-                                                Source="/ImageResources/MainExecution/noto--megaphone.png" />
-                                        </Border>
                                         <TextBlock
                                             Grid.Column="1"
                                             Margin="10,20,0,0"
@@ -1951,10 +1929,10 @@
 
                             </Grid>
 
-                            <Elements:SocialMedia
+                            <!--<Elements:SocialMedia
                                 Margin="0,0,10,0"
                                 HorizontalAlignment="Right"
-                                VerticalAlignment="Center" />
+                                VerticalAlignment="Center" />-->
                         </Grid>
                     </Grid>
 
@@ -2275,7 +2253,7 @@
                                                 HorizontalAlignment="Left"
                                                 VerticalAlignment="Center"
                                                 RenderOptions.BitmapScalingMode="HighQuality"
-                                                Source="/ImageResources/MainExecution/executeicon.png" />
+                                                Source="/Graphics/Images/MainExecution/executeicon.png" />
                                             <TextBlock
                                                 x:Name="Execute_T"
                                                 Margin="20,0,0,0"
@@ -2310,7 +2288,7 @@
                                                 HorizontalAlignment="Left"
                                                 VerticalAlignment="Center"
                                                 RenderOptions.BitmapScalingMode="HighQuality"
-                                                Source="/ImageResources/MainExecution/pasta2.png" />
+                                                Source="/Graphics/Images/MainExecution/pasta2.png" />
                                             <TextBlock
                                                 x:Name="Open_T"
                                                 Margin="24,0,0,0"
@@ -2345,7 +2323,7 @@
                                                 HorizontalAlignment="Left"
                                                 VerticalAlignment="Center"
                                                 RenderOptions.BitmapScalingMode="HighQuality"
-                                                Source="/ImageResources/MainExecution/salvar.png" />
+                                                Source="/Graphics/Images/MainExecution/salvar.png" />
                                             <TextBlock
                                                 x:Name="Save_T"
                                                 Margin="24,0,0,0"
@@ -2380,7 +2358,7 @@
                                                 HorizontalAlignment="Left"
                                                 VerticalAlignment="Center"
                                                 RenderOptions.BitmapScalingMode="HighQuality"
-                                                Source="/ImageResources/MainExecution/limpar.png" />
+                                                Source="/Graphics/Images/MainExecution/limpar.png" />
                                             <TextBlock
                                                 x:Name="Clear_T"
                                                 Margin="24,0,0,0"
@@ -2739,7 +2717,7 @@
                                             Opacity="0.8"
                                             PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown"
                                             RenderOptions.BitmapScalingMode="HighQuality"
-                                            Source="/ImageResources/ScriptHub/SearchBoxIcon.png" />
+                                            Source="/Graphics/Images/MainExecution/SearchBoxIcon.png" />
                                     </Grid>
                                 </Border>
                                 <Button
@@ -2885,7 +2863,7 @@
                                         VerticalAlignment="Top"
                                         CornerRadius="5">
                                         <Border.Background>
-                                            <ImageBrush ImageSource="/ImageResources/Ads+Premium/Resellers/2cdfbb01cc428b58cedf97e7614d0f60.png" Opacity="0.9" />
+                                            <ImageBrush ImageSource="/Graphics/Images/Ads+Premium/Resellers/2cdfbb01cc428b58cedf97e7614d0f60.png" Opacity="0.9" />
                                         </Border.Background>
 
                                         <Grid Margin="0.2,0.2,-3,-3.8">
@@ -3922,7 +3900,7 @@
                                             <Image
                                                 x:Name="PlayerImage3"
                                                 Margin="-10,-10,-10,-10"
-                                                Source="pack://application:,,,/ImageResources/MainExecution/bacon.png" />
+                                                Source="/Graphics/Images/MainExecution/bacon.png" />
                                         </Border>
 
                                         <Border
@@ -4126,7 +4104,7 @@
                                             VerticalAlignment="Center"
                                             RenderOptions.BitmapScalingMode="HighQuality"
                                             RenderOptions.EdgeMode="Aliased"
-                                            Source="/Essence.png" />
+                                            Source="/Graphics/Images/essence.png" />
                                     </Border>
 
                                     <TextBlock
@@ -4213,7 +4191,7 @@
                                                     HorizontalAlignment="Left"
                                                     VerticalAlignment="Center"
                                                     RenderOptions.BitmapScalingMode="HighQuality"
-                                                    Source="/ImageResources/MainExecution/mage--trash.png" />
+                                                    Source="/Graphics/Images/MainExecution/mage--trash.png" />
                                             </Grid>
                                         </Button>
 
@@ -4277,7 +4255,7 @@
                                             HorizontalAlignment="Left"
                                             VerticalAlignment="Center"
                                             RenderOptions.BitmapScalingMode="HighQuality"
-                                            Source="/ImageResources/ScriptHub/copiar.png" />
+                                            Source="/Graphics/Images/MainExecution/copiar.png" />
                                     </Grid>
                                 </Button>
 
@@ -4413,10 +4391,10 @@
                                             Height="20"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
-                                            gif:ImageBehavior.AnimatedSource="/ImageResources/MainExecution/AI-writing.gif"
+                                            gif:ImageBehavior.AnimatedSource="/Graphics/Images/MainExecution/AI-writing.gif"
                                             RenderOptions.BitmapScalingMode="HighQuality"
                                             RenderOptions.EdgeMode="Aliased"
-                                            Source="/ImageResources/MainExecution/AI-writing.gif"
+                                            Source="/Graphics/Images/MainExecution/AI-writing.gif"
                                             Visibility="Collapsed" />
                                     </Grid>
                                     <TextBlock
@@ -4490,7 +4468,6 @@
                     <Border
                         x:Name="SettingsGrid"
                         Margin="60,40,0,0"
-                        d:IsHidden="True"
                         CornerRadius="10, 0, 0, 0">
                         <Grid>
 
@@ -4523,7 +4500,7 @@
                                                 VerticalAlignment="Top"
                                                 RenderOptions.BitmapScalingMode="HighQuality"
                                                 RenderTransformOrigin="0.4,0.6"
-                                                Source="/ImageResources/Settings/palette.png" />
+                                                Source="/Graphics/Images/Settings/palette.png" />
                                         </WrapPanel>
 
                                         <TextBlock
@@ -4769,7 +4746,7 @@
                                             VerticalAlignment="Top"
                                             RenderOptions.BitmapScalingMode="HighQuality"
                                             RenderTransformOrigin="0.4,0.6"
-                                            Source="/ImageResources/Settings/Roblox6.png" />
+                                            Source="/Graphics/Images/Settings/Roblox6.png" />
                                     </Grid>
 
                                     <Border
@@ -4889,7 +4866,7 @@
                                                 VerticalAlignment="Top"
                                                 RenderOptions.BitmapScalingMode="HighQuality"
                                                 RenderTransformOrigin="0.4,0.6"
-                                                Source="/ImageResources/MainExecution/AI-writing.gif" />
+                                                Source="/Graphics/Images/MainExecution/AI-writing.gif" />
                                         </WrapPanel>
                                         <TextBlock
                                             Margin="0,25,0,0"
@@ -5019,7 +4996,7 @@
                                                 VerticalAlignment="Top"
                                                 RenderOptions.BitmapScalingMode="HighQuality"
                                                 RenderTransformOrigin="0.4,0.6"
-                                                Source="/ImageResources/Settings/fluent--window-wrench-28-filled.png" />
+                                                Source="/Graphics/Images/Settings/fluent--window-wrench-28-filled.png" />
                                         </WrapPanel>
                                         <TextBlock
                                             Margin="0,25,0,0"
@@ -5192,7 +5169,7 @@
                                             VerticalAlignment="Top"
                                             RenderOptions.BitmapScalingMode="HighQuality"
                                             RenderTransformOrigin="0.4,0.6"
-                                            Source="/ImageResources/Settings/palette.png" />
+                                            Source="/Graphics/Images/Settings/palette.png" />
                                     </Grid>
 
                                     <Border
@@ -5367,7 +5344,7 @@
                                                 HorizontalAlignment="Right"
                                                 Cursor="Hand"
                                                 PreviewMouseLeftButtonDown="OpenSpooferBtn_PreviewMouseLeftButtonDown"
-                                                Source="/ImageResources/Settings/reset.png" />
+                                                Source="/Graphics/Images/Settings/reset.png" />
                                         </Grid>
                                     </Border>
 
@@ -5454,7 +5431,7 @@
                                             Width="40"
                                             RenderOptions.BitmapScalingMode="HighQuality"
                                             RenderOptions.EdgeMode="Aliased"
-                                            Source="/Elements/M4A1.png" />
+                                            Source="/Graphics/Images/M4A1.png" />
                                     </Border>
                                     <TextBlock
                                         x:Name="User_config"
@@ -5570,7 +5547,7 @@
                             Margin="0,50,300,0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Source="/ImageResources/Exeptions/RobloxError.png" />
+                            Source="/Graphics/Images/M4A1.png" />
 
                         <TextBlock
                             x:Name="Warnin_ServOff_13"
@@ -5829,7 +5806,7 @@
                                         Margin="2,2,2,2"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Data="M396 432H136c-36.44 0-70.36-12.57-95.51-35.41C14.38 372.88 0 340 0 304c0-36.58 13.39-68.12 38.72-91.22c19.93-18.19 47.12-30.56 77.38-35.37a156.4 156.4 0 0 1 45.22-63.61C187.76 91.69 220.5 80 256 80a153.57 153.57 0 0 1 107.14 42.9c27.06 26.06 44.59 61.28 51.11 102.46C463.56 232.66 512 266.15 512 328c0 33.39-12.24 60.78-35.41 79.23C456.23 423.43 428.37 432 396 432"
+                                        Data="M5.99 3a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm7 0a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2h-1.995a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm9.08 3.543l3.86 15.483a2 2 0 0 1-1.457 2.425l-1.963.49a2 2 0 0 1-2.424-1.458L16.226 8a2 2 0 0 1 1.456-2.425l1.963-.489a2 2 0 0 1 2.425 1.457"
                                         Fill="#FFB6B6B6"
                                         Stretch="Uniform"
                                         StrokeThickness="2" />
@@ -5946,7 +5923,7 @@
                                             x:Name="User_Img2"
                                             RenderOptions.BitmapScalingMode="HighQuality"
                                             RenderOptions.EdgeMode="Aliased"
-                                            Source="/ImageResources/Settings/user.png" />
+                                            Source="/Graphics/Images/Settings/user.png" />
                                     </Border>
 
                                     <Border
@@ -6000,7 +5977,7 @@
                         ClipToBounds="True">
                         <Image
                             x:Name="gfgdfg"
-                            Source="/ImageResources/Backgrounds/1243734d7e2a4654.png"
+                            Source="/Graphics/Images/Backgrounds/1243734d7e2a4654.png"
                             Stretch="UniformToFill" />
                         <!--<Canvas Panel.ZIndex="2" IsHitTestVisible="False" Visibility="Collapsed">
                             <Ellipse x:Name="BlurRectangle" Width="80" IsHitTestVisible="False" Height="80" Fill="#FFBA5B7E" HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -6423,7 +6400,7 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             RenderOptions.BitmapScalingMode="HighQuality"
-                            Source="/essence.png" />
+                            Source="/Graphics/Images/essence.png" />
                         <TextBlock
                             x:Name="EVXTXT"
                             Margin="18,0,0,0"
@@ -6447,7 +6424,7 @@
                         Opacity="0.9"
                         OpacityMask="#FF454545"
                         RenderOptions.BitmapScalingMode="HighQuality"
-                        Source="/ImageResources/MainExecution/CloseWindowIcon.png">
+                        Source="/Graphics/Images/MainExecution/CloseWindowIcon.png">
                         <Image.Style>
                             <Style TargetType="{x:Type Image}">
                                 <Style.Triggers>
@@ -6492,7 +6469,7 @@
                         Opacity="0.9"
                         OpacityMask="#FF454545"
                         RenderOptions.BitmapScalingMode="HighQuality"
-                        Source="/ImageResources/maximize.png">
+                        Source="/Graphics/Images/MainExecution/maximize.png">
                         <Image.Style>
                             <Style TargetType="{x:Type Image}">
                                 <Style.Triggers>
@@ -6538,7 +6515,7 @@
                         Opacity="0.9"
                         OpacityMask="#FF454545"
                         RenderOptions.BitmapScalingMode="HighQuality"
-                        Source="/ImageResources/minimize.png">
+                        Source="/Graphics/Images/MainExecution/minimize.png">
                         <Image.Style>
                             <Style TargetType="{x:Type Image}">
                                 <Style.Triggers>

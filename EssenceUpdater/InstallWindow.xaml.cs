@@ -1,16 +1,14 @@
 ﻿using IWshRuntimeLibrary;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Security.Policy;
-using System.Text;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,9 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace EssenceUpdater
 {
@@ -221,6 +217,13 @@ namespace EssenceUpdater
         }
 
 
+
+
+
+
+
+
+
         int adload = 0;
         private string adlink = "";
         MediaElement LoadedMediaElement = null;
@@ -228,6 +231,35 @@ namespace EssenceUpdater
         private int sspeed = 4;
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            //bool vm = true;
+            //try
+            //{
+            //    using (var searcher = new System.Management.ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSAcpi_ThermalZoneTemperature"))
+            //    {
+            //        foreach (var queryObj in searcher.Get())
+            //        {
+            //            if (queryObj["CurrentTemperature"] != null)
+            //            {
+            //                double _ = ((Convert.ToDouble(queryObj["CurrentTemperature"]) - 2732) / 10.0);
+            //                vm = false;
+            //            }
+            //        }
+            //    }
+            //}
+            //catch { }
+
+            //if (vm)
+            //    MessageBox.Show(
+            //        "Warning: \n\n" +
+            //        "If this is malware testing, note that advanced obfuscation and virtualization techniques are used, which may trigger high-level detections.",
+            //        "VM Detected",
+            //        MessageBoxButton.OK,
+            //        MessageBoxImage.Warning
+            //    );
+
+            //string jwt = Marshal.PtrToStringAnsi(Helpers.DoJwt("login:mysterysas32@gmail.com,region:PT,password:12345678"));
+            //Console.WriteLine(jwt);
+
             Show();
             Startup();
         }
@@ -287,19 +319,18 @@ namespace EssenceUpdater
                 }
                 Dispatcher.Invoke(() => EULARichTextBox.Document.Blocks.Add(paragraph));
             }
-
             try
             {
                 string image = "";
-                JObject jsonObj = JObject.Parse(await httpreq("externals/v1/ads"));
+                JObject jsonObj = JObject.Parse(await httpreq("externals/ads"));
                 image = jsonObj["installer"]?["image"].ToString() ?? "https://www.pixground.com/colorful-abstract-background-moving-waves-4k-wallpaper/?download-img=4k";
                 adlink = jsonObj["installer"]?["link"].ToString() ?? discordinvite;
 
-                if (await Helpers.DownloadFile(image, Path.Combine(EssenceFolder, "lol.mp4")))
+                if (await Helpers.DownloadFile(image, Path.Combine(EssenceFolder, "advertisement.mp4"), auth:false))
                 {
                     LoadedMediaElement = new MediaElement
                     {
-                        Source = new Uri(Path.Combine(EssenceFolder, "lol.mp4"), UriKind.RelativeOrAbsolute),
+                        Source = new Uri(Path.Combine(EssenceFolder, "advertisement.mp4"), UriKind.RelativeOrAbsolute),
                         LoadedBehavior = MediaState.Manual,
                         UnloadedBehavior = MediaState.Manual,
                         Volume = 0,
@@ -317,7 +348,7 @@ namespace EssenceUpdater
 
                         LoadedMediaElement = new MediaElement
                         {
-                            Source = new Uri(Path.Combine(EssenceFolder, "lol.mp4"), UriKind.RelativeOrAbsolute),
+                            Source = new Uri(Path.Combine(EssenceFolder, "advertisement.mp4"), UriKind.RelativeOrAbsolute),
                             LoadedBehavior = MediaState.Manual,
                             UnloadedBehavior = MediaState.Manual,
                             Volume = 0,
@@ -502,7 +533,6 @@ namespace EssenceUpdater
             //    await Task.Delay(1000);
             //}
             instprocess.Text = "Returning...";
-
             RestartBar();
 
             await Task.Delay(500);
@@ -539,6 +569,8 @@ namespace EssenceUpdater
             await Task.Delay(80);
             Move(0.4, EulaB, EulaB.Margin, new Thickness(210, 0, 0, 40));
             CancelB.IsEnabled = true;
+
+
         }
 
         int tries = 0;
@@ -546,8 +578,6 @@ namespace EssenceUpdater
         {
             try
             {
-
-
                 using (HttpClient client = new HttpClient())
                 {
                     //client.DefaultRequestHeaders.Add("authenticity", Helpers.a_r());
@@ -560,7 +590,7 @@ namespace EssenceUpdater
                     }
                     else
                     {
-                        if (tries < 5)
+                        if (tries < 3)
                         {
                             tries++;
                             return await httpreq(endpoint);
@@ -586,12 +616,21 @@ namespace EssenceUpdater
         internal static bool stopstuff = false;
         Dictionary<string, string> downloads = new Dictionary<string, string>();
         Dictionary<string, string> hashes = new Dictionary<string, string>();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr LoadLibrary(string dll);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool FreeLibrary(IntPtr dl);
+
+        private bool loadedd;
+        private IntPtr dl;
         private async Task DoRealStuff()
         {
             downloads.Clear();
             hashes.Clear();
 
-            instprocess.Text = "Connecting To Server...";
+            instprocess.Text = "Connecting To Server..."; 
             Storyboard sb = (Storyboard)FindResource("GradientAnimation");
             sb.Begin();
 
@@ -608,11 +647,72 @@ namespace EssenceUpdater
                 }
                 else
                 {
-                    MessageBox.Show("You're not connected to internet");
+                    MessageBox.Show("EssenceUpdater could not reach Essence Servers. Try again later");
                     CancelStuff();
                     return;
                 }
             }
+
+            Fade(0.3, afsdassaads, 0, 1);
+            afsdassaads.Visibility = Visibility.Visible;
+            dsadasdad.Text = "Loading";
+            int upd = 1;
+            await Task.Run(() =>
+            {
+                if (loadedd)
+                {
+                    if (FreeLibrary(dl))
+                        loadedd = false;
+                }
+
+                if (!loadedd)
+                {
+                    try
+                    {
+                        Dispatcher.Invoke(() => dsadasdad.Text = "Unpacking Auth");
+                        string dllP = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Auth.dll");
+                        if (System.IO.File.Exists(dllP))
+                            System.IO.File.Delete(dllP);
+
+                        using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("EssenceUpdater.Dlls.Auth.dll"))
+                        {
+                            using (FileStream fileStream = new FileStream(dllP, FileMode.Create, FileAccess.Write))
+                            {
+                                stream.CopyTo(fileStream);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                if (!loadedd)
+                {
+                    Dispatcher.Invoke(() => dsadasdad.Text = "Loading Auth");
+                    dl = LoadLibrary("Auth.dll");
+                    loadedd = (dl != IntPtr.Zero);
+                }
+
+                Dispatcher.Invoke(() => dsadasdad.Text = "Checking Updates");               
+                try { upd = Helpers.InitAuth(); } catch (Exception ex) { MessageBox.Show(ex.ToString()); }
+            });
+
+            if (upd != 0)
+            {
+                string discordlink = await httpreq("externals/discord");
+                dsadasdad.Text = "Visit our website to download the latest version";
+                MessageBox.Show("This Updater version is oudated. Please visit our discord for new version.");
+                Process.Start(discordlink);
+                CancelStuff();
+                Fade(0.3, afsdassaads, 1, 0);
+                await Task.Delay(300);
+                afsdassaads.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            dsadasdad.Text = "Updated!";
+            Fade(0.3, afsdassaads, 1, 0);
+            await Task.Delay(300);
+            afsdassaads.Visibility = Visibility.Collapsed;
 
             if (!Directory.Exists(EssenceFolder))
                 Directory.CreateDirectory(EssenceFolder);
@@ -621,7 +721,7 @@ namespace EssenceUpdater
 
             sspeed = 10;
             instprocess.Text = "Getting Links & Hashes...";
-            string resposta = await httpreq("externals/v1/files");
+            string resposta = await httpreq("externals/files");
             if(resposta == "e")
             {
                 MessageBox.Show("Could not get stuff from server. Try again");
@@ -667,7 +767,7 @@ namespace EssenceUpdater
                         var link = file.Value["Link"]?.ToString();
                         if (location != null && hash != null && link != null && download != null)
                         {
-                            if (Helpers.CalculateMD5(Path.Combine(EssenceFolder, location)) != hash)
+                            if (Helpers.CalculateSHA256(Path.Combine(EssenceFolder, location)) != hash)
                             {
                                 downloads.Add(download, link);
                                 hashes.Add(Path.Combine(EssenceFolder, location), hash);
@@ -823,7 +923,7 @@ namespace EssenceUpdater
 
             foreach(var files in hashes)
             {
-                if (Helpers.CalculateMD5(files.Key) != files.Value)
+                if (Helpers.CalculateSHA256(files.Key) != files.Value)
                 {
                     MessageBox.Show("WOW some files mysteriously disappeared!", files.Key);
                     MessageBox.Show("please turn off your antivirus and try again");
@@ -853,6 +953,19 @@ namespace EssenceUpdater
             Color1.Color = (Color)ColorConverter.ConvertFromString("#FF7EE07E");
             Color2.Color = (Color)ColorConverter.ConvertFromString("#FF3EDD69");
 
+            try
+            {
+                var d = new
+                {
+                    CollectGameData = CollectGameData.IsChecked.ToString(),
+                    Date = DateTime.Now.ToString()
+                };
+                System.IO.File.WriteAllText(Path.Combine(EssenceFolder, "InstallSettings.json"), JsonConvert.SerializeObject(d, Formatting.Indented));
+            }
+            catch
+            {
+
+            }
 
             try
             {
@@ -865,15 +978,15 @@ namespace EssenceUpdater
 
                 string targetPath = Path.Combine(EssenceFolder, "Essence.exe");
 
-                IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
+                WshShell shell = new WshShell();
 
-                IWshRuntimeLibrary.IWshShortcut desktopShortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(desktopShortcutPath);
+                IWshShortcut desktopShortcut = (IWshShortcut)shell.CreateShortcut(desktopShortcutPath);
                 desktopShortcut.Description = "Essence Launcher";
                 desktopShortcut.TargetPath = targetPath;
                 desktopShortcut.IconLocation = targetPath;
                 desktopShortcut.Save();
 
-                IWshRuntimeLibrary.IWshShortcut startMenuShortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(startMenuShortcutPath);
+                IWshShortcut startMenuShortcut = (IWshShortcut)shell.CreateShortcut(startMenuShortcutPath);
                 startMenuShortcut.Description = "Essence Launcher";
                 startMenuShortcut.TargetPath = targetPath;
                 startMenuShortcut.IconLocation = targetPath;
@@ -938,6 +1051,11 @@ namespace EssenceUpdater
             {
 
             }
+        }
+
+        private void CollectGameData_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
