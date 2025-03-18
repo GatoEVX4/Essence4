@@ -37,9 +37,9 @@ namespace Essence
 
         internal static async Task<bool> TestExecution(int max = 0)
         {
-            if (Process.GetProcessesByName("Injector").Length <= 0 || Process.GetProcessesByName("RobloxPlayerBeta").Length <= 0)
+            if (Process.GetProcessesByName("RobloxPlayerBeta").Length <= 0)
             {
-                Console.WriteLine("Injector is Closed. Test failed");
+                Console.WriteLine("Roblox closed. Test failed");
                 api2.CloseInjectors(true);
                 return false;
             }
@@ -51,15 +51,29 @@ namespace Essence
 
             for (int i = 0; i < max; i++)
             {
-                Task.Run(async () =>
+                await Task.Run(async () =>
                 {
-                    try { Execute($"writefile('{num}.check', 'nice')"); } catch { }
+                    try
+                    {
+                        using TcpClient tcpClient = new TcpClient();
+                        tcpClient.Connect("localhost", 4555);
+                        using NetworkStream networkStream = tcpClient.GetStream();
+                        byte[] bytes = Encoding.UTF8.GetBytes($"writefile('{num}.check', 'nice')");
+                        networkStream.Write(bytes, 0, bytes.Length);
+                        networkStream.Flush();
+                    }
+                    catch
+                    {
+                        //MessageBox.Show("Error: " + ex.Message);
+                    }
+
+                    //try { Execute($"writefile('{num}.check', 'nice')"); } catch { }
                 });
                 await Task.Delay(200);
 
                 if (File.Exists(api2.workspace + $"\\{num}.check"))
                 {
-                    await Task.Delay(100);
+                    await Task.Delay(150);
                     try { File.Delete(api2.workspace + $"\\{num}.check"); } catch { }
                     return true;
                 }
@@ -71,7 +85,7 @@ namespace Essence
                         {
                             if (File.Exists(Path.GetDirectoryName(p.MainModule.FileName) + $"\\workspace\\{num}.check"))
                             {
-                                await Task.Delay(100);
+                                await Task.Delay(150);
                                 try { File.Delete(Path.GetDirectoryName(p.MainModule.FileName) + $"\\workspace\\{num}.check"); } catch { }
                                 return true;
                             }
@@ -87,6 +101,9 @@ namespace Essence
             return false;
         }
 
+
+        internal static readonly string EssenceFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Essence");
+
         internal static async Task<InjectionResult> Inject()
         {
             try
@@ -95,8 +112,8 @@ namespace Essence
                 {
                     Process.Start(new ProcessStartInfo()
                     {
-                        FileName = "C:\\Essence\\Injector.exe",
-                        WorkingDirectory = "C:\\Essence",
+                        FileName = $"{EssenceFolder}\\bin\\Injector.exe",
+                        WorkingDirectory = Path.Combine(EssenceFolder, "bin"),
                         CreateNoWindow = true,
                         WindowStyle = ProcessWindowStyle.Hidden
                     });

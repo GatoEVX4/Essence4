@@ -229,7 +229,7 @@ bool Check() {
         if (GetModuleFileNameExW(hProcess, NULL, caminho, MAX_PATH)) {
             BYTE hashCalculado[32];
             std::string hashStr;
-            if (!FileSHA256(caminho, hashCalculado, hashStr)) {                
+            if (!FileSHA256(caminho, hashCalculado, hashStr)) {
                 CloseHandle(hProcess);
                 FreeFire();
                 return false;
@@ -440,7 +440,7 @@ bool TestServer(const std::string& url) {
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, +[](void*, size_t size, size_t nmemb, void*) -> size_t {
         return size * nmemb;
-    });
+        });
 
 
     CURLcode res = curl_easy_perform(curl);
@@ -512,7 +512,7 @@ std::string StartWS(ServerCallback srvcall) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         return "";
     }
-   
+
     starting_connection = true;
 
     if (!TestServer("https://essenceapi.discloud.app")) {
@@ -522,7 +522,7 @@ std::string StartWS(ServerCallback srvcall) {
             srvcall("server-offline");
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-        starting_connection = false;        
+        starting_connection = false;
         return StartWS(srvcall);
     }
 
@@ -616,11 +616,11 @@ std::string StartWS(ServerCallback srvcall) {
         srvcall("server-offline");
         return StartWS(srvcall);
 
-            //if (!io_thread) {
-            //    io_thread = std::make_unique<std::thread>([] {
-            //        io_context.run();
-            //    });
-            //}
+        //if (!io_thread) {
+        //    io_thread = std::make_unique<std::thread>([] {
+        //        io_context.run();
+        //    });
+        //}
     }
     catch (const boost::system::system_error& e) {
         starting_connection = false;
@@ -635,8 +635,8 @@ std::string StartWS(ServerCallback srvcall) {
 }
 
 
-const char* DecJwt(const char* token) {    
-    try {        
+const char* DecJwt(const char* token) {
+    try {
         auto decoded = jwt::decode(token);
         jwt::verify().allow_algorithm(jwt::algorithm::hs256{ K2 }).verify(decoded);
 
@@ -652,7 +652,7 @@ const char* DecJwt(const char* token) {
 
             first = false;
         }
-        oss << "}";    
+        oss << "}";
         return _strdup(oss.str().c_str());
     }
     catch (const std::exception& ex) {
@@ -703,16 +703,16 @@ extern "C" __declspec(dllexport) const char* GenDownloadRA() {
     if (!Check()) return nullptr;
     //VM_END
 
-    return strdup(GenRequestAuth("DWNF").c_str());
+    return _strdup(GenRequestAuth("DWNF").c_str());
 }
 
 extern "C" __declspec(dllexport) const char* GetHWID()
 {
     if (!Check()) return nullptr;
-    return strdup(GenHWID().c_str());
+    return _strdup(GenHWID().c_str());
 }
 
-extern "C" __declspec(dllexport) void DiscordAuth(const int port){
+extern "C" __declspec(dllexport) void DiscordAuth(const int port) {
     if (!Check()) return;
 
     std::string auth_link = "https://discord.com/api/oauth2/authorize?client_id=1336373573744332963"
@@ -728,7 +728,7 @@ extern "C" __declspec(dllexport) void DiscordAuth(const int port){
 
 extern "C" __declspec(dllexport) const char* Decrypt(const char* encryptedtoken) {
     if (!Check()) return nullptr;
-    return strdup(Dec(encryptedtoken, true, true).c_str());
+    return _strdup(Dec(encryptedtoken, true, true).c_str());
 }
 
 extern "C" __declspec(dllexport) long long TimeLeft(const std::string& file) {
@@ -874,10 +874,10 @@ extern "C" __declspec(dllexport) const char* RequestResource(const char* res, co
 
                 if (xd == 0) {
                     srvcall("server-online");
-                    return strdup(response.c_str());
+                    return _strdup(response.c_str());
                 }
             }
-            
+
 
             if (force_return) {
                 return "error";
@@ -996,7 +996,7 @@ extern "C" __declspec(dllexport) const char* PostReq(const char* finalk, bool fo
                         return retryUntilSuccess(finalk, srvcall);
                     }
 
-                    return strdup(re.c_str());
+                    return _strdup(re.c_str());
                 }
                 else {
                     if (force_return) {
@@ -1184,7 +1184,7 @@ extern "C" __declspec(dllexport) int InitAuth(const char* t) {
             curl_slist_free_all(headers);
             curl_easy_cleanup(curl);
         }
-        catch(...){
+        catch (...) {
             std::cout << "Request rejected. Prob oudated version x" << std::endl;
             return 2;
         }
@@ -1219,7 +1219,7 @@ extern "C" __declspec(dllexport) void CloseServer() {
             client->close(websocket::close_code::normal);
         }
     }
-    catch(...){
+    catch (...) {
 
     }
 }
@@ -1227,18 +1227,18 @@ extern "C" __declspec(dllexport) void CloseServer() {
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     switch (ul_reason_for_call) {
-        case DLL_PROCESS_ATTACH: 
-            std::cout << "Auth Initialize" << std::endl;
-            break;
+    case DLL_PROCESS_ATTACH:
+        std::cout << "Auth Initialize" << std::endl;
+        break;
 
-        case DLL_THREAD_ATTACH:
-            break;
+    case DLL_THREAD_ATTACH:
+        break;
 
-        case DLL_THREAD_DETACH:
-            break;
+    case DLL_THREAD_DETACH:
+        break;
 
-        case DLL_PROCESS_DETACH:
-            break;
+    case DLL_PROCESS_DETACH:
+        break;
     }
     return TRUE;
 }

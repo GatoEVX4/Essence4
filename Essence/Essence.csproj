@@ -18,7 +18,6 @@
 	<ApplicationIcon>essence.ico</ApplicationIcon>
 	<ApplicationManifest>app.manifest</ApplicationManifest>
 	<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-	<SupportedOSPlatformVersion>10.0.18362.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <IsPublishable>True</IsPublishable>

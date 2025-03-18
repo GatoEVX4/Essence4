@@ -19,13 +19,64 @@ using System.IO.Compression;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace EssenceExperiments
 {
     class Program
     {
+        static string CorrectLuaScript(string input)
+        {
+            // Esse regex procura por chamadas de função do tipo objeto:metodo("alguma string" 
+            // que não estejam imediatamente seguidas de um ")" e insere o parêntese faltante.
+            string pattern = @"(\w+[:.]\w+\(""[^""]*""\s*)(?!\))";
+            string replacement = "$1)";
+            input = Regex.Replace(input, pattern, replacement);
+            return input;
+        }
+
+
+
+        static string kkk = @"lua
+local Players = game:GetService(""Players""local RunService = game:GetService(""RunService""local UserInputService = game:GetService(""UserInputService""local LocalPlayer = Players.LocalPlayer
+
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(""HumanoidRootPart"" then
+            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude
+            if distance < shortestDistance then
+                closestPlayer = player
+                shortestDistance = distance
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+local function aimAt(target)
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass(""Humanoid"" and LocalPlayer.Character.Humanoid.Health > 0 then
+        local camera = workspace.CurrentCamera
+        local targetPosition = target.Character.HumanoidRootPart.Position + Vector3.new(0, target.Character.HumanoidRootPart.Size.Y / 2, 0)
+        local _, lookAt = camera:WorldToScreenPoint(targetPosition)
+
+        mousemoverel(lookAt.X - UserInputService:GetMouseLocation().X, lookAt.Y - UserInputService:GetMouseLocation().Y)
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    local target = getClosestPlayer()
+    if target then
+        aimAt(target)
+    end
+end)";
         static async Task Main(string[] args)
         {
+            Console.WriteLine(CorrectLuaScript(kkk));
+            return;
             while (true)
             {
                 string src = "";

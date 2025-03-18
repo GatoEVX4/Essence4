@@ -50,6 +50,8 @@ using Essence.Windows;
 using System.Management;
 using System.Windows.Media.Media3D;
 using Microsoft.VisualBasic.Logging;
+using System.Collections.Concurrent;
+using System.Net.Sockets;
 
 
 
@@ -257,7 +259,7 @@ public class Player
     }
 }
 
-public class LogWatcher : IDisposable
+public class LogWatcher
 {
     private const string GameJoiningEntry = "[FLog::Output] ! Joining game";
     private const string GameLeavingEntry = "[FLog::SingleSurfaceApp] leaveUGCGameInternal";
@@ -265,7 +267,6 @@ public class LogWatcher : IDisposable
     private const string UserEntry = "Application did receive notification, type(DID_LOG_IN";
     private const string UserPattern = @"""username"":""([^""]+)"".*?""userId"":(\d+).*?""displayName"":""([^""]+)""";
 
-    private bool _isDisposed;
     public long CurrentPlaceId;
     internal bool StopAllInteractions;
     public List<Player> CurrentPlayers { get; } = new List<Player>();
@@ -284,9 +285,9 @@ public class LogWatcher : IDisposable
 
     private async Task MonitorNewLogs(string logDirectory)
     {
-        while (!StopAllInteractions && !_isDisposed)
+        while (true)
         {
-            if (Directory.Exists(logDirectory))
+            if (!StopAllInteractions && Directory.Exists(logDirectory))
             {
                 var newLogFiles = new DirectoryInfo(logDirectory).GetFiles("*.log");
                 foreach (var logFile in newLogFiles)
@@ -305,6 +306,7 @@ public class LogWatcher : IDisposable
                             if (pidd == 0)
                             {
                                 CurrentPlayers.Remove(player);
+                                try { File.Delete(logFile.FullName); } catch { }
                             }
                         }
                         else
@@ -330,12 +332,12 @@ public class LogWatcher : IDisposable
                 {
                     string line;
 
-                    while ((line = sr.ReadLine()) != null && !_isDisposed)
+                    while ((line = sr.ReadLine()) != null)
                     {
                         ExamineLogEntry(line, logFileInfo.FullName);
                     }
 
-                    while (!_isDisposed && !StopAllInteractions)
+                    while (!StopAllInteractions)
                     {
                         var player = CurrentPlayers.FirstOrDefault(p => p.Logfile == logFileInfo.FullName);
                         if (player == null)
@@ -455,7 +457,6 @@ public class LogWatcher : IDisposable
 
                 if (player == null)
                 {
-                    Console.WriteLine("Adding new Player...");
                     player = new Player(logname, GetLockingProcessId(logname), username, displayName, userId);
                     CurrentPlayers.Add(player);
                 }
@@ -486,12 +487,6 @@ public class LogWatcher : IDisposable
             if (player != null)
                 player.IsInGame = true;
         }
-    }
-
-    public void Dispose()
-    {
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
     }
 }
 
@@ -1720,7 +1715,7 @@ public partial class MainWindow : Window
     static bool IsWindowOpen(string processName)
     {
         var processes = Process.GetProcessesByName(processName);
-        return processes.Any(p => p.MainWindowHandle != IntPtr.Zero);
+        return processes.Length > 0 && processes.Any(p => p.MainWindowHandle != IntPtr.Zero);
     }
 
 
@@ -1734,13 +1729,14 @@ public partial class MainWindow : Window
             {
                 while (!StopAllInteractions)
                 {
-                    await Task.Delay(3000);
+                    await Task.Delay(2000);
 
                     if (patched)
                         return;
 
                     if (IsWindowOpen("RobloxPlayerBeta"))
                     {
+                        MessageBox.Show("DDD");
                         general.robloxlocalversions = new List<string>();
 
                         foreach (Process p in Process.GetProcessesByName("RobloxPlayerBeta"))
@@ -1760,7 +1756,6 @@ public partial class MainWindow : Window
 
                             }
                         }
-
 
                         if (logWatcher.CurrentPlayers.All(player => !player.IsInGame))
                         {
@@ -1786,6 +1781,7 @@ public partial class MainWindow : Window
                                     LastplayedText2.Text = "";
                                 }
                             });
+                            continue;
                         }
                         else
                         {
@@ -1829,9 +1825,8 @@ public partial class MainWindow : Window
                                         //Status_Label.Text = "Injected";
                                         ServerHop.IsEnabled = true;
                                     });
+                                    continue;
                                 }
-                                else
-                                    inj5 = false;
                             }
                             else if (!InjectionInProgress && !patched && !inj5)
                             {
@@ -1843,6 +1838,7 @@ public partial class MainWindow : Window
                                     inj5 = true;
                                     EXECUTAR(Encoding.UTF8.GetString(Properties.Resources.loadessence), true);
                                     await Dispatcher.InvokeAsync(() => Notificar("Using previous injection"));
+                                    continue;
                                 }
                                 else
                                 {
@@ -1851,40 +1847,39 @@ public partial class MainWindow : Window
 
 
                                     var result = await api2.Inject();
-
-                                    await Dispatcher.InvokeAsync(async () =>
+                                    InjectionInProgress = false;
+                                    if (result == api2.InjectionResult.Success)
                                     {
-                                        switch (result)
-                                        {
-                                            case api2.InjectionResult.Success:
-                                                inj5 = true;
-                                                EXECUTAR(Encoding.UTF8.GetString(Properties.Resources.loadessence), true);
-                                                await Dispatcher.InvokeAsync(() => Notificar("Injected"));
-                                                break;
-
-                                            case api2.InjectionResult.Failed:
-                                                //Status_Label.Text = "Failed To Inject";
-                                                await Dispatcher.InvokeAsync(() => Notificar("Failed to inject"));
-
-                                                await Task.Delay(3000);
-                                                break;
-                                        }
-                                    });
-                                }
-
-                                InjectionInProgress = false;
+                                        inj5 = true;
+                                        EXECUTAR(Encoding.UTF8.GetString(Properties.Resources.loadessence), true);
+                                        await Dispatcher.InvokeAsync(() => Notificar("Injected"));
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        await Dispatcher.InvokeAsync(() => Notificar("Failed to inject"));
+                                        await Task.Delay(3000);
+                                        continue;
+                                    }
+                                }                                
                             }
                         }
                     }
+                    else if (Process.GetProcessesByName("RobloxPlayerBeta").Length > 0)
+                    {
+                        MessageBox.Show("ddddddddd");
+                        fwfefeqfqefe.Fill = new SolidColorBrush(Colors.DarkCyan);
+
+                        LastplayedText0.Text = "Waiting Roblox Window";
+                        LastplayedText1.Text = "Roblox Is Starting";
+                        LastplayedText2.Text = "";
+                    }
                     else
                     {
-                        logWatcher.Dispose();
-
-                        adsandsandjsa = false;
+                        MessageBox.Show("DDssssssssD");
                         await Dispatcher.InvokeAsync(() =>
                         {
                             fwfefeqfqefe.Fill = new SolidColorBrush(Colors.Gray);
-                            //Status_Label.Text = "Roblox not found";
 
                             if (!string.IsNullOrEmpty(lastplayedurl))
                             {
@@ -1898,16 +1893,16 @@ public partial class MainWindow : Window
                                 LastplayedText2.Text = "Start Roblox Now!";
                             }
                         });
+                    }
 
-                        await Task.Delay(1000);
-
-                        string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Roblox", "logs");
-                        if (Directory.Exists(logDirectory))
+                    adsandsandjsa = false;
+                    inj5 = false;
+                    string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Roblox", "logs");
+                    if (Directory.Exists(logDirectory))
+                    {
+                        foreach (var filePath in Directory.GetFiles(logDirectory, "*.log"))
                         {
-                            foreach (var filePath in Directory.GetFiles(logDirectory, "*.log"))
-                            {
-                                try { File.Delete(filePath); } catch { }
-                            }
+                            try { File.Delete(filePath); } catch { }
                         }
                     }
                 }
@@ -1995,7 +1990,21 @@ public partial class MainWindow : Window
         {
             try
             {
-                api2.Execute(script);
+                try
+                {
+                    using TcpClient tcpClient = new TcpClient();
+                    tcpClient.Connect("localhost", 4555);
+                    using NetworkStream networkStream = tcpClient.GetStream();
+                    byte[] bytes = Encoding.UTF8.GetBytes(script);
+                    networkStream.Write(bytes, 0, bytes.Length);
+                    networkStream.Flush();
+                }
+                catch
+                {
+                    //MessageBox.Show("Error: " + ex.Message);
+                }
+
+                //api2.Execute(script);
             }
             catch (Exception ex)
             {
@@ -7421,7 +7430,7 @@ public partial class MainWindow : Window
                 FontSize = 13,
                 TextAlignment = TextAlignment.Left,
                 Foreground = Brushes.White,
-                Text = "Fowarding Request",
+                Text = "Thinking...",
                 Margin = new Thickness(40, 5, 0, 5),
                 BorderThickness = new Thickness(0),
                 BorderBrush = null,
@@ -7503,61 +7512,58 @@ public partial class MainWindow : Window
         expandedddd = 1;
         cj832f82f82fjn.Text = "1";
 
+        string editortxt = "";
         try
         {
             var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(10));
-
-            Random random = new Random();
-            string prompt = current_text + "\n[USER]" + Environment.NewLine + input;
-            //qunfu23fhndu73ndn.Text = lm.Translate("Making Request...");
-            qunfu23fhndu73ndn.Text = lm.Translate("Mastermind is thinking...");
-
+            qunfu23fhndu73ndn.Text = lm.Translate("Thinking...");
 
             bool isScripting = false;
-            bool connecting = true;
-            string kkkk = "";
+            StringBuilder fullResponse = new StringBuilder();
             bool nefdnqufnq = false;
 
             try
             {
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("authenticity", Secure.GenDownloadAuth());
-                client.DefaultRequestHeaders.Add("token", await Secure.UpdateJWT($"message:{prompt}"));
+                client.DefaultRequestHeaders.Add("token", await Secure.UpdateJWT($"message:{input},script:{current_text}"));
 
-                using (var response = await client.GetAsync("http://essenceapi.discloud.app/externals/aichat", HttpCompletionOption.ResponseHeadersRead))
+                string previousToken = "";  // Variável para armazenar a parte anterior do token, caso seja dividido.
+                bool dsadmasmd = false;
+                bool del = true;
+
+
+                using (var response = await client.GetAsync("https://essenceapi.discloud.app/externals/aichat", HttpCompletionOption.ResponseHeadersRead))
                 {
-                    response.EnsureSuccessStatusCode();
-
-                    // Processar resposta em tempo real
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     using (var reader = new StreamReader(stream))
                     {
-                        string line;
-                        while ((line = await reader.ReadLineAsync()) != null)
+                        StringBuilder token = new StringBuilder();
+                        while (!reader.EndOfStream)
                         {
-                            kkkk = kkkk + line;
-
-                            if (connecting)
-                            {
-                                await Dispatcher.InvokeAsync(async () =>
-                                {
-                                    aitext.Text = "";
-                                    await SetEditorTextAsync(AIeditor, "");
-                                    qunfu23fhndu73ndn.Text = lm.Translate("Mastermind is thinking...");
-                                });
+                            char c = (char)reader.Read();                            
+                            if (del) {
+                                del = false;
+                                aitext.Text = ""; 
                             }
-                            connecting = false;
 
-                            if (line.Contains("```lua"))
-                                isScripting = true;
-                            else if (line.Contains("```"))
-                                isScripting = false;
-
-                            if (isScripting)
+                            if (c == '\u0001')
                             {
-                                await Dispatcher.InvokeAsync(async () =>
+                                if ((previousToken + token.ToString()).Contains("```lua") && !isScripting)
+                                    isScripting = true;
+                                
+                                else if ((previousToken + token.ToString()).Contains("```") && isScripting)
+                                    isScripting = false;                                
+
+                                token.Replace(@"\n", Environment.NewLine);
+                                token.Replace("\\", "\"");
+                                token.Replace("```lua", "");
+
+                                if (isScripting)
                                 {
+                                    dsadmasmd = true;
+                                    token.Replace("lua\n", "");
                                     if (!nefdnqufnq && expandedddd != 2)
                                     {
                                         nefdnqufnq = true;
@@ -7567,20 +7573,37 @@ public partial class MainWindow : Window
                                         cj832f82f82fjn.Text = "2";
                                     }
 
-                                    await SetEditorTextAsync(AIeditor, await GetEditorText(AIeditor) + line + Environment.NewLine);
-                                });
+                                    editortxt += token;
+                                    //string gg = Regex.Replace(editortxt.Replace("lua\n", ""), @"\((['""])(.*?)\1(?![),])", match => match.Value + ")\n");
+                                    await Task.Delay(1);
+                                    await SetEditorTextAsync(AIeditor, editortxt);   
+                                }
+                                else
+                                {
+                                    string t = "";
+                                    if (token.ToString().Contains("```") && dsadmasmd)
+                                    {
+                                        t = token.ToString().Replace("```", Environment.NewLine + "[SCRIPT GENERATED]" + Environment.NewLine);
+                                        dsadmasmd = false;
+                                    }
+                                    else
+                                        t = token.ToString().Replace("```", "");
+
+                                    for (int i = 0; i < t.Length; i++)
+                                    {
+                                        aitext.Text += t.Substring(i, 1);
+                                        await Task.Delay(2);
+                                    }
+                                }
+
+                                Console.WriteLine($"Recebido: {token}");
+                                previousToken = token.ToString();
+                                token.Clear();
                             }
                             else
                             {
-                                await Dispatcher.InvokeAsync(async () =>
-                                {
-                                    line = line.Replace("```", Environment.NewLine + Environment.NewLine + "[SCRIPT GENERATED]" + Environment.NewLine + Environment.NewLine);
-                                    for (int i = 0; i < line.Length; i++)
-                                    {
-                                        aitext.Text += line.ElementAt(i);
-                                        await Task.Delay(8);
-                                    }                                   
-                                });
+                                token.Append(c);
+                                fullResponse.Append(c);
                             }
                         }
                     }
@@ -7588,61 +7611,10 @@ public partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro: {ex.Message}");
+                MessageBox.Show($"Erro: {ex.Message}");
             }
 
-            //await Communications.RequestResource("Mastermind", $"message:{prompt}", true, async (line) =>
-            //{
-            //    kkkk = kkkk + line;
-
-            //    if (connecting)
-            //    {
-            //        await Dispatcher.InvokeAsync(async () =>
-            //        {
-            //            aitext.Text = "";
-            //            await SetEditorTextAsync(AIeditor, "");
-            //            qunfu23fhndu73ndn.Text = lm.Translate("Mastermind is thinking...");
-            //        });
-            //    }
-            //    connecting = false;
-
-            //    if (line.Contains("```lua"))
-            //        isScripting = true;
-            //    else if (line.Contains("```"))
-            //        isScripting = false;
-
-            //    if (isScripting)
-            //    {
-            //        await Dispatcher.InvokeAsync(async () =>
-            //        {
-            //            if (!nefdnqufnq && expandedddd != 2)
-            //            {
-            //                nefdnqufnq = true;
-            //                dwindfikwdmnkwdmwm.Width = new GridLength(1.5, GridUnitType.Star);
-            //                dhjdcu3j8j8f82jf4jf4jfi8.Width = new GridLength(1, GridUnitType.Star);
-            //                expandedddd = 2;
-            //                cj832f82f82fjn.Text = "2";
-            //            }
-
-            //            await SetEditorTextAsync(AIeditor, await GetEditorText(AIeditor) + line + Environment.NewLine);
-            //        });
-            //    }
-            //    else
-            //    {
-            //        await Dispatcher.InvokeAsync(() =>
-            //        {
-            //            line = line.Replace("```", Environment.NewLine + Environment.NewLine + "[SCRIPT GENERATED]" + Environment.NewLine + Environment.NewLine);
-            //            aitext.Text += line;
-            //        });
-            //        //var sb = new StringBuilder(aitext.Text);
-            //        //foreach (char c in line)
-            //        //{
-            //        //    sb.Append(c);
-            //        //    aitext.Text = sb.ToString();
-            //        //    await Task.Delay(8);
-            //        //}
-            //    }
-            //});
+            await SetEditorTextAsync(AIeditor, editortxt.Replace("lua\r\n", ""));
 
             await Dispatcher.InvokeAsync(() =>
             {
@@ -7657,7 +7629,7 @@ public partial class MainWindow : Window
                     sw.WriteLine(input);
 
                     sw.WriteLine("\n[Mastermind]");
-                    sw.WriteLine(kkkk + "\n\n\n");
+                    sw.WriteLine(fullResponse.ToString() + "\n\n\n");
                 }
             }
             catch { }
@@ -9774,7 +9746,7 @@ public partial class MainWindow : Window
 
         Move(ProfileSettings.UserManagementBorder, new Thickness(-150, 25, 0, 25), new Thickness(50, 25, 0, 25), 0.6);
         Fade(ProfileSettings.UserManagementGrid, 0, 1, 0.4);
-        ProfileSettings.IsHitTestVisible = false;
+        ProfileSettings.IsHitTestVisible = true;
 
         ProfileSettings.EnableBlur();
 
