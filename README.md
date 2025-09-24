@@ -10,3 +10,7 @@ The previous source I shared represents something closer to the conclusion of an
 If you haven’t read it yet, I strongly recommend checking it out — it reflects much of what I learned during the process.
 
 ---
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/GatoEVX4/Essence4/refs/heads/master/EssenceUpdater/EasterEgg.jpg" width="400">
+</p>
